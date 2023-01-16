@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Depends, Request, status
 from sqlalchemy.orm import Session
 from fastapi.responses import JSONResponse
+from typing import List
 
 
 from app import models, schemas, crud
@@ -37,6 +38,17 @@ def get_db():
 def read_root():
     return {"documentation": "/docs"}
 
+
+@app.post(
+    "/api/v1/menus/",
+    response_model=schemas.MenuBase,
+    name='Создать меню'
+)
+def add_menu(data: schemas.MenuCreate, db: Session = Depends(get_db)):
+    menu = crud.create_menu(db, menu=data)
+    return crud.get_menu(db, id=menu.id)
+
+
 # Просмотр определенного меню
 @app.get(
     "/api/v1/menus/{id}/",
@@ -50,14 +62,14 @@ def get_menu(id: int, db: Session = Depends(get_db)):
     return menu
 
 
-# Выдача меню
-# @app.get(
-#     "/api/v1/menus",
-#     response_model=schemas.MenuList,
-#     name="Выдача списка меню",
-# )
-# def get_menu_list(db: Session = Depends(get_db)):
-#     return crud.get_menu_list(db)
+# Выдача списка меню
+@app.get(
+    "/api/v1/menus",
+    response_model=List[schemas.MenuBase],
+    name="Выдача списка меню",
+)
+def get_menu_list(db: Session = Depends(get_db)):
+    return crud.get_menu_list(db)
 
 
 # Обработчики ошибок
