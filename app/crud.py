@@ -42,3 +42,15 @@ def create_menu(db: Session, menu: schemas.MenuCreate):
     db.add(new_menu)
     db.commit()
     return new_menu
+
+
+# Обновление меню
+def update_menu(db: Session, id: int, update_menu: schemas.MenuCreate):
+    db_menu = db.query(models.Menu).filter(models.Menu.id == id).first()
+    if not db_menu:
+        raise MenuExistsException()
+    db_menu.title = update_menu.title
+    db_menu.description = update_menu.description
+    db.add(db_menu)
+    db.commit()
+    return db_menu

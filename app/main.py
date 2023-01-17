@@ -65,8 +65,23 @@ def add_menu(data: schemas.MenuCreate, db: Session = Depends(get_db)):
 def get_menu(id: int, db: Session = Depends(get_db)):
     menu = crud.get_menu(db, id=id)
     if not menu:
-        raise MenuExistsException(id)
+        raise MenuExistsException()
     return menu
+
+
+# Обновить меню
+@app.patch(
+    "/api/v1/menus/{id}/",
+    response_model=schemas.MenuBase,
+    name="Обновить меню",
+)
+def update_menu(id: int, data: schemas.MenuCreate, db: Session = Depends(get_db)):
+    menu = crud.get_menu(db, id=id)
+    if not menu:
+        raise MenuExistsException()
+    update_menu = crud.update_menu(db, id, data)
+    return crud.get_menu(db, id=update_menu.id)
+
 
 
 # Обработчики ошибок
