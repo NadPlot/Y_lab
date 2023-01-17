@@ -28,3 +28,9 @@ class SubmenuBase(BaseModel):
 
     class Config:
         orm_mode = True
+
+
+# Запись и обновление таблица Submenu
+class SubmenuCreate(BaseModel):
+    title: str
+    description: str

@@ -77,11 +77,20 @@ def get_submenu(db: Session, menu_id: int, submenu_id: int):
     return result
 
 
-# Выдача списка подменю
+# Просмотр списка подменю
 def get_submenu_list(db: Session, menu_id: int):
-    all_submenu = db.query(models.Submenu).filter(models.Submenu.menu_id == menu.id).all()
+    all_submenu = db.query(models.Submenu).filter(models.Submenu.menu_id == menu_id).all()
     if not all_submenu:
         return []
     else:
-        list_submenu = [get_submenu(db, menu.id) for menu in all_submenu]
+        list_submenu = [get_submenu(db, menu_id, submenu.id) for submenu in all_submenu]
         return list_submenu
+
+
+# Создание подменю
+def create_submenu(db: Session, menu_id: int, submenu: schemas.SubmenuCreate):
+    new_submenu = models.Submenu(**submenu.dict())
+    new_submenu.menu_id = menu_id
+    db.add(new_submenu)
+    db.commit()
+    return new_submenu

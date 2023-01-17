@@ -7,7 +7,6 @@ from app.exceptions import MenuExistsException, SubmenuExistsException
 from app.database import SessionLocal, engine
 
 
-
 description = """
 Интенсив по Python (Y_lab)
 
@@ -92,6 +91,28 @@ def delete_menu(id: int, db: Session = Depends(get_db)):
         status_code=200,
         content={"status": "true", "message": "The menu has been deleted"}
     )
+
+
+# Просмотр списка подменю
+@app.get(
+    "/api/v1/menus/{menu_id}/submenus",
+    response_model=List[schemas.SubmenuBase],
+    name="Просмотр списка подменю",
+)
+def get_submenu_list(menu_id: int, db: Session = Depends(get_db)):
+    return crud.get_submenu_list(db, menu_id)
+
+
+# Создание подменю
+@app.post(
+    "/api/v1/menus/{menu_id}/submenus",
+    response_model=schemas.SubmenuBase,
+    name='Создать подменю',
+    status_code=201,
+)
+def add_submenu(menu_id: int, data: schemas.SubmenuCreate, db: Session = Depends(get_db)):
+    submenu = crud.create_submenu(db, menu_id=menu_id, submenu=data)
+    return crud.get_submenu(db, menu_id=menu_id, submenu_id=submenu.id)
 
 
 # Просмотр определенного подменю
