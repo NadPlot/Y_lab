@@ -1,14 +1,14 @@
 from sqlalchemy.orm import Session
 from fastapi.encoders import jsonable_encoder
 from app import models, schemas
-from app.exceptions import MenuExistsException
+from app.exceptions import MenuExistsException, SubmenuExistsException
 
 
 # Просмотр определенного меню
 def get_menu(db: Session, id: int):
     menu = db.query(models.Menu).filter(models.Menu.id == id).first()
     if not menu:
-        raise MenuExistsException(id)
+        raise MenuExistsException()
     result = jsonable_encoder(menu)
 
     submenus = db.query(models.Submenu).filter(models.Submenu.menu_id == id).all()
@@ -61,3 +61,27 @@ def delete_menu(db: Session, id: int):
     db_menu = db.query(models.Menu).filter(models.Menu.id == id).first()
     db.delete(db_menu)
     db.commit()
+
+
+# Просмотр определенного подменю
+def get_submenu(db: Session, menu_id: int, submenu_id: int):
+    submenu = db.query(models.Submenu).filter(models.Submenu.menu_id == menu_id).filter(models.Submenu.id == submenu_id).first()
+    if not submenu:
+        raise SubmenuExistsException()
+    result = jsonable_encoder(submenu)
+    dishes = db.query(models.Dishes).filter(models.Dishes.submenu_id == submenu.id).all()
+    if not dishes:
+        result['dishes_count'] = 0
+    else:
+        result['dishes_count'] = len(dishes)
+    return result
+
+
+# Выдача списка подменю
+def get_submenu_list(db: Session, menu_id: int):
+    all_submenu = db.query(models.Submenu).filter(models.Submenu.menu_id == menu.id).all()
+    if not all_submenu:
+        return []
+    else:
+        list_submenu = [get_submenu(db, menu.id) for menu in all_submenu]
+        return list_submenu

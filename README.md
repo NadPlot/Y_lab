@@ -14,18 +14,21 @@ uvicorn
 python-dotenv      
 
 
-Отдельно была создана БД: menu в PostgreSQL.
-Таблицы в БД созданы простым способом, при первом запуске приложения FastAPI.
-Важно, чтобы до запуска была создана БД, имя которой указывается в переменной
-окружения DATABASE_URL=postgresql://postgres:postgres@localhost:5432/menu.
+Отдельно была создана БД в PostgreSQL.
+Важно, чтобы до запуска приложения FastAPI (app) была создана БД,
+имя которой указывается в переменной DATABASE_URL.
 
+Таблицы в БД созданы простым способом, при первом запуске приложения FastAPI.
+
+app/main.py
 
     models.Base.metadata.create_all(bind=engine)  # Создание таблиц БД
 
 Alembic не использовала.
-Для подключения к БД использовала переменную окружения, пример:
+Для подключения к БД использовала переменную окружения, которая
+хранится в файле .env, пример:
     
-    DATABASE_URL=postgresql://user:password@localhost:5432/db_name.
+    DATABASE_URL=postgresql://username:password@localhost:5432/db_name.
 
 
 ## Запуск проекта в виртуальной среде

@@ -17,3 +17,14 @@ class MenuBase(BaseModel):
 class MenuCreate(BaseModel):
     title: str
     description: str
+
+
+# Чтение таблица Submenu
+class SubmenuBase(BaseModel):
+    id: str
+    title: str
+    description: str
+    dishes_count: int
+
+    class Config:
+        orm_mode = True

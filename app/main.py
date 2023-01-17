@@ -2,12 +2,10 @@ from fastapi import FastAPI, Depends, Request, status
 from sqlalchemy.orm import Session
 from fastapi.responses import JSONResponse
 from typing import List
-
-
 from app import models, schemas, crud
-
+from app.exceptions import MenuExistsException, SubmenuExistsException
 from app.database import SessionLocal, engine
-from app.exceptions import MenuExistsException
+
 
 
 description = """
@@ -96,10 +94,31 @@ def delete_menu(id: int, db: Session = Depends(get_db)):
     )
 
 
+# Просмотр определенного подменю
+@app.get(
+    "/api/v1/menus/{menu_id}/submenus/{submenu_id}/",
+    response_model=schemas.SubmenuBase,
+    name="Просмотр определенного подменю",
+)
+def get_submenu(menu_id: int, submenu_id: int, db: Session = Depends(get_db)):
+    submenu = crud.get_submenu(db, menu_id=menu_id, submenu_id=submenu_id)
+    if not submenu:
+        raise SubmenuExistsException()
+    return submenu
+
+
 # Обработчики ошибок
 @app.exception_handler(MenuExistsException)
-async def pereval_exists_handler(request: Request, exc: MenuExistsException):
+async def menu_exists_handler(request: Request, exc: MenuExistsException):
     return JSONResponse(
         status_code=404,
         content={"detail": "menu not found"}
+    )
+
+
+@app.exception_handler(SubmenuExistsException)
+async def submenu_exists_handler(request: Request, exc: SubmenuExistsException):
+    return JSONResponse(
+        status_code=404,
+        content={"detail": "submenu not found"}
     )
