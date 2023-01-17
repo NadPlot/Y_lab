@@ -17,23 +17,13 @@ def get_menu(db: Session, id: int):
         result['dishes_count'] = 0
     else:
         result['submenus_count'] = len(submenus)
-
-    for submenu in submenus:
-        dishes = db.query(models.Dishes).filter(models.Dishes.submenu_id == submenu.id).all()
-        if not dishes:
-            result['dishes_count'] = 0
-        else:
-            result['dishes_count'] = len(dishes)
-
+        for submenu in submenus:
+            dishes = db.query(models.Dishes).filter(models.Dishes.submenu_id == submenu.id).all()
+            if not dishes:
+                result['dishes_count'] = 0
+            else:
+                result['dishes_count'] = len(dishes)
     return result
-
-# Создание меню
-def create_menu(db: Session, menu: schemas.MenuCreate):
-    new_menu = models.Menu(**menu.dict())
-    db.add(new_menu)
-    db.commit()
-    return new_menu
-
 
 
 # Выдача списка меню
@@ -42,4 +32,13 @@ def get_menu_list(db: Session):
     if not all_menu:
         return []
     else:
-        return all_menu
+        list_menu = [get_menu(db, menu.id) for menu in all_menu]
+        return list_menu
+
+
+# Создание меню
+def create_menu(db: Session, menu: schemas.MenuCreate):
+    new_menu = models.Menu(**menu.dict())
+    db.add(new_menu)
+    db.commit()
+    return new_menu

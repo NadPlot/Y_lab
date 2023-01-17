@@ -4,11 +4,11 @@ from typing import Optional, List
 
 # База чтение таблица Menu
 class MenuBase(BaseModel):
-    id: int
+    id: str
     title: str
     description: str
-    submenus_count: Optional[int]
-    dishes_count: Optional[int]
+    submenus_count: int
+    dishes_count: int
     
     class Config:
         orm_mode = True
@@ -17,10 +17,3 @@ class MenuBase(BaseModel):
 class MenuCreate(BaseModel):
     title: str
     description: str
-
-
-class MenuList(BaseModel):
-    menu: List[MenuBase]
-
-    class Config:
-        orm_mode = True

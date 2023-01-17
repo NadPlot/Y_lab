@@ -1,7 +1,5 @@
 from sqlalchemy import Column
-from sqlalchemy import String, Integer, Float, ForeignKey, Sequence
-from sqlalchemy.orm import relationship
-import uuid
+from sqlalchemy import String, Integer, Float, ForeignKey
 
 from app.database import Base
 
