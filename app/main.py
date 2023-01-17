@@ -83,6 +83,18 @@ def update_menu(id: int, data: schemas.MenuCreate, db: Session = Depends(get_db)
     return crud.get_menu(db, id=update_menu.id)
 
 
+# Удаление меню
+@app.delete(
+    "/api/v1/menus/{id}/",
+    name="Удаление меню",
+)
+def delete_menu(id: int, db: Session = Depends(get_db)):
+    crud.delete_menu(db, id)
+    return JSONResponse(
+        status_code=200,
+        content={"status": "true", "message": "The menu has been deleted"}
+    )
+
 
 # Обработчики ошибок
 @app.exception_handler(MenuExistsException)

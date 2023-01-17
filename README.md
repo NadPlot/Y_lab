@@ -14,11 +14,18 @@ uvicorn
 python-dotenv      
 
 
-Отдельно была создана БД: menu в PostgreSQL. Alembic не использовала.
-При первом запуске будут созданы в БД menu таблицы menu, submenu, dishes.
+Отдельно была создана БД: menu в PostgreSQL.
+Таблицы в БД созданы простым способом, при первом запуске приложения FastAPI.
+Важно, чтобы до запуска была создана БД, имя которой указывается в переменной
+окружения DATABASE_URL=postgresql://postgres:postgres@localhost:5432/menu.
 
-Добавлена переменная окружения DATABASE_URL=postgresql://postgres:postgres@localhost:5432/menu.
-В данной переменной можно указать путь до БД: postgresql://user:password@localhost:5432/db_name.
+
+    models.Base.metadata.create_all(bind=engine)  # Создание таблиц БД
+
+Alembic не использовала.
+Для подключения к БД использовала переменную окружения, пример:
+    
+    DATABASE_URL=postgresql://user:password@localhost:5432/db_name.
 
 
 ## Запуск проекта в виртуальной среде

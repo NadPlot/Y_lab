@@ -54,3 +54,10 @@ def update_menu(db: Session, id: int, update_menu: schemas.MenuCreate):
     db.add(db_menu)
     db.commit()
     return db_menu
+
+
+# Удаление меню
+def delete_menu(db: Session, id: int):
+    db_menu = db.query(models.Menu).filter(models.Menu.id == id).first()
+    db.delete(db_menu)
+    db.commit()
