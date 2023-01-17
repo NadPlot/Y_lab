@@ -94,3 +94,23 @@ def create_submenu(db: Session, menu_id: int, submenu: schemas.SubmenuCreate):
     db.add(new_submenu)
     db.commit()
     return new_submenu
+
+
+# Обновление подменю
+def update_submenu(db: Session, menu_id: int, submenu_id: int, update_submenu: schemas.SubmenuCreate):
+    db_submenu = db.query(models.Submenu).filter(models.Submenu.menu_id == menu_id).filter(models.Submenu.id == submenu_id).first()
+    if not db_submenu:
+        raise SubmenuExistsException()
+    else:
+        db_submenu.title = update_submenu.title
+        db_submenu.description = update_submenu.description
+        db.add(db_submenu)
+        db.commit()
+    return db_submenu
+
+
+# Удаление подменю
+def delete_submenu(db: Session, menu_id: int, submenu_id: int):
+    db_submenu = db.query(models.Submenu).filter(models.Submenu.menu_id == menu_id).filter(models.Submenu.id == submenu_id).first()
+    db.delete(db_submenu)
+    db.commit()

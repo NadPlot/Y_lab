@@ -10,8 +10,7 @@ from app.database import SessionLocal, engine
 description = """
 Интенсив по Python (Y_lab)
 
-REST API
-Меню ресторана (Домашнее задание, Вебинар №1)
+REST API по работе с меню ресторана
 
 """
 models.Base.metadata.create_all(bind=engine)
@@ -49,8 +48,8 @@ def get_menu_list(db: Session = Depends(get_db)):
     status_code=201,
 )
 def add_menu(data: schemas.MenuCreate, db: Session = Depends(get_db)):
-    menu = crud.create_menu(db, menu=data)
-    return crud.get_menu(db, id=menu.id)
+    menu = crud.create_menu(db, data)
+    return crud.get_menu(db, menu.id)
 
 
 # Просмотр определенного меню
@@ -60,7 +59,7 @@ def add_menu(data: schemas.MenuCreate, db: Session = Depends(get_db)):
     name="Просмотр определенного меню",
 )
 def get_menu(id: int, db: Session = Depends(get_db)):
-    menu = crud.get_menu(db, id=id)
+    menu = crud.get_menu(db, id)
     if not menu:
         raise MenuExistsException()
     return menu
@@ -73,11 +72,11 @@ def get_menu(id: int, db: Session = Depends(get_db)):
     name="Обновить меню",
 )
 def update_menu(id: int, data: schemas.MenuCreate, db: Session = Depends(get_db)):
-    menu = crud.get_menu(db, id=id)
+    menu = crud.get_menu(db, id)
     if not menu:
         raise MenuExistsException()
     update_menu = crud.update_menu(db, id, data)
-    return crud.get_menu(db, id=update_menu.id)
+    return crud.get_menu(db, update_menu.id)
 
 
 # Удаление меню
@@ -111,8 +110,8 @@ def get_submenu_list(menu_id: int, db: Session = Depends(get_db)):
     status_code=201,
 )
 def add_submenu(menu_id: int, data: schemas.SubmenuCreate, db: Session = Depends(get_db)):
-    submenu = crud.create_submenu(db, menu_id=menu_id, submenu=data)
-    return crud.get_submenu(db, menu_id=menu_id, submenu_id=submenu.id)
+    submenu = crud.create_submenu(db, menu_id, data)
+    return crud.get_submenu(db, menu_id, submenu.id)
 
 
 # Просмотр определенного подменю
@@ -122,10 +121,37 @@ def add_submenu(menu_id: int, data: schemas.SubmenuCreate, db: Session = Depends
     name="Просмотр определенного подменю",
 )
 def get_submenu(menu_id: int, submenu_id: int, db: Session = Depends(get_db)):
-    submenu = crud.get_submenu(db, menu_id=menu_id, submenu_id=submenu_id)
+    submenu = crud.get_submenu(db, menu_id, submenu_id)
     if not submenu:
         raise SubmenuExistsException()
     return submenu
+
+
+# Обновить подменю
+@app.patch(
+    "/api/v1/menus/{menu_id}/submenus/{submenu_id}/",
+    response_model=schemas.SubmenuBase,
+    name="Обновить подменю",
+)
+def update_submenu(menu_id: int, submenu_id: int, data: schemas.SubmenuCreate, db: Session = Depends(get_db)):
+    submenu = crud.get_submenu(db, menu_id, submenu_id)
+    if not submenu:
+        raise SubmenuExistsException()
+    update_submenu = crud.update_submenu(db, menu_id, submenu_id, data)
+    return crud.get_submenu(db, menu_id, update_submenu.id)
+
+
+# Удаление подменю
+@app.delete(
+    "/api/v1/menus/{menu_id}/submenus/{submenu_id}/",
+    name="Удаление подменю",
+)
+def delete_submenu(menu_id: int, submenu_id: int, db: Session = Depends(get_db)):
+    crud.delete_submenu(db, menu_id, submenu_id)
+    return JSONResponse(
+        status_code=200,
+        content={"status": "true", "message": "The submenu has been deleted"}
+    )
 
 
 # Обработчики ошибок
