@@ -4,3 +4,7 @@ class MenuExistsException(Exception):
 
 class SubmenuExistsException(Exception):
     pass
+
+
+class DishExistsException(Exception):
+    pass

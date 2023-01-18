@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from fastapi.encoders import jsonable_encoder
 from app import models, schemas
-from app.exceptions import MenuExistsException, SubmenuExistsException
+from app.exceptions import MenuExistsException, SubmenuExistsException, DishExistsException
 
 
 # Просмотр определенного меню
@@ -113,4 +113,53 @@ def update_submenu(db: Session, menu_id: int, submenu_id: int, update_submenu: s
 def delete_submenu(db: Session, menu_id: int, submenu_id: int):
     db_submenu = db.query(models.Submenu).filter(models.Submenu.menu_id == menu_id).filter(models.Submenu.id == submenu_id).first()
     db.delete(db_submenu)
+    db.commit()
+
+
+# Просмотр определенного блюда
+def get_dish(db: Session, submenu_id: int, id: int):
+    dish = db.query(models.Dishes).filter(models.Dishes.submenu_id == submenu_id).filter(models.Dishes.id == id).first()
+    if not dish:
+        raise DishExistsException()
+    return dish
+
+
+# Создать блюдо
+def create_dish(db: Session, submenu_id: int, dish: schemas.DishesCreate):
+    new_dish = models.Dishes(**dish.dict())
+    new_dish.price = round(dish.price, 2)
+    new_dish.submenu_id = submenu_id
+    db.add(new_dish)
+    db.commit()
+    return new_dish
+
+
+# Обновить блюдо
+def update_dish(db: Session, submenu_id: int, id: int, update_dish: schemas.DishesCreate):
+    db_dish = db.query(models.Dishes).filter(models.Dishes.submenu_id == submenu_id).filter(models.Dishes.id == id).first()
+    if not db_dish:
+        raise DishExistsException()
+    else:
+        db_dish.title = update_dish.title
+        db_dish.description = update_dish.description
+        db_dish.price = round(update_dish.price, 2)
+        db.add(db_dish)
+        db.commit()
+    return db_dish
+
+
+# Просмотр списка блюд
+def get_dishes_list(db: Session, submenu_id: int):
+    all_dishes = db.query(models.Dishes).filter(models.Dishes.submenu_id == submenu_id).all()
+    if not all_dishes:
+        return []
+    else:
+        list_dishes = [get_dish(db, submenu_id, dish.id) for dish in all_dishes]
+        return list_dishes
+
+
+# Удаление блюда
+def delete_dish(db: Session, submenu_id: int, id: int):
+    db_dish = db.query(models.Dishes).filter(models.Dishes.submenu_id == submenu_id).filter(models.Dishes.id == id).first()
+    db.delete(db_dish)
     db.commit()

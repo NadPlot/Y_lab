@@ -34,3 +34,21 @@ class SubmenuBase(BaseModel):
 class SubmenuCreate(BaseModel):
     title: str
     description: str
+
+
+# Чтение таблица Dishes
+class DishesBase(BaseModel):
+    id: str
+    title: str
+    description: str
+    price: str
+
+    class Config:
+        orm_mode = True
+
+
+# Запись и обновление таблица Dishes
+class DishesCreate(BaseModel):
+    title: str
+    description: str
+    price: float

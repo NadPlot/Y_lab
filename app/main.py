@@ -3,7 +3,7 @@ from sqlalchemy.orm import Session
 from fastapi.responses import JSONResponse
 from typing import List
 from app import models, schemas, crud
-from app.exceptions import MenuExistsException, SubmenuExistsException
+from app.exceptions import MenuExistsException, SubmenuExistsException, DishExistsException
 from app.database import SessionLocal, engine
 
 
@@ -154,6 +154,68 @@ def delete_submenu(menu_id: int, submenu_id: int, db: Session = Depends(get_db))
     )
 
 
+# Просмотр списка блюд
+@app.get(
+    "/api/v1/menus/{menu_id}/submenus/{submenu_id}/dishes",
+    response_model=List[schemas.DishesBase],
+    name="Выдача списка блюд",
+)
+def get_dishes_list(menu_id: int, submenu_id: int, db: Session = Depends(get_db)):
+    return crud.get_dishes_list(db, submenu_id)
+
+
+# Просмотр определенного блюда
+@app.get(
+    "/api/v1/menus/{menu_id}/submenus/{submenu_id}/dishes/{id}",
+    response_model=schemas.DishesBase,
+    name="Просмотр определенного блюда",
+)
+def get_dish(submenu_id: int, id: int, db: Session = Depends(get_db)):
+    dish = crud.get_dish(db, submenu_id, id)
+    if not dish:
+        raise DishExistsException()
+    return dish
+
+
+# Создать блюдо
+@app.post(
+    "/api/v1/menus/{menu_id}/submenus/{submenu_id}/dishes",
+    response_model=schemas.DishesBase,
+    name='Создать блюдо',
+    status_code=201,
+)
+def add_dish(menu_id: int, submenu_id: int, data: schemas.DishesCreate, db: Session = Depends(get_db)):
+    dish = crud.create_dish(db, submenu_id, data)
+    return crud.get_dish(db, submenu_id, dish.id)
+
+
+# Обновить блюдо
+@app.patch(
+    "/api/v1/menus/{menu_id}/submenus/{submenu_id}/dishes/{id}",
+    response_model=schemas.DishesBase,
+    name="Обновить блюдо",
+)
+def update_dish(menu_id: int, submenu_id: int, id: int, data: schemas.DishesCreate, db: Session = Depends(get_db)):
+    dish = crud.get_dish(db, submenu_id, id)
+    if not dish:
+        raise DishExistsException()
+    update_dish = crud.update_dish(db, submenu_id, id, data)
+    return crud.get_dish(db, submenu_id, update_dish.id)
+
+
+# Удаление блюда
+@app.delete(
+    "/api/v1/menus/{menu_id}/submenus/{submenu_id}/dishes/{id}",
+    name="Удалить блюдо",
+)
+def delete_dish(menu_id: int, submenu_id: int, id: int, db: Session = Depends(get_db)):
+    crud.delete_dish(db, submenu_id, id)
+    return JSONResponse(
+        status_code=200,
+        content={"status": "true", "message": "The dish has been deleted"}
+    )
+
+
 # Обработчики ошибок
 @app.exception_handler(MenuExistsException)
 async def menu_exists_handler(request: Request, exc: MenuExistsException):
@@ -168,4 +230,12 @@ async def submenu_exists_handler(request: Request, exc: SubmenuExistsException):
     return JSONResponse(
         status_code=404,
         content={"detail": "submenu not found"}
+    )
+
+
+@app.exception_handler(DishExistsException)
+async def dish_exists_handler(request: Request, exc: DishExistsException):
+    return JSONResponse(
+        status_code=404,
+        content={"detail": "dish not found"}
     )
