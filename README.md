@@ -2,7 +2,7 @@
 REST API по работе с меню ресторана
 
 ## Задача:
-Написать проект на FastAPI с использованием PostgreSQL в качестве БД.
+Написать проект на FastAPI с использованием PostgreSQL в качестве БД, и обурнуть в контейнер (Docker Compose).
 В проекте следует реализовать REST API по работе с меню ресторана, все CRUD операции.
 
 ### Даны 3 сущности: Меню, Подменю, Блюдо.
@@ -21,18 +21,17 @@ REST API по работе с меню ресторана
 ● Во время запуска тестового сценария БД должна быть пуста.
 
 ## Requirements
-Была создана виртуальная среда и установлены пакеты:
  
-fastapi   
-sqlalchemy     
-psycopg2-binary    
-uvicorn   
-python-dotenv      
+fastapi==0.89.1   
+SQLAlchemy==1.4.46     
+psycopg2-binary==2.9.5    
+uvicorn==0.20.0   
+python-dotenv==0.21.0     
 
+## Подключение к БД
 
-Отдельно была создана БД в PostgreSQL.
-Важно, чтобы до запуска приложения FastAPI (app) была создана БД,
-имя которой указывается в переменной DATABASE_URL в файл .env (нужно создать).
+В процессе запуска контейнера будет создана БД, имя которой указано в файле .env,
+в переменной POSTGRES_DB.
 
 Таблицы в БД созданы простым способом, при первом запуске приложения FastAPI.
 
@@ -42,14 +41,19 @@ app/main.py
 
 Alembic не использовала.
 Для подключения к БД использовала переменную окружения, которая
-хранится в файле .env, пример:
-    
-    DATABASE_URL=postgresql://username:password@localhost:5432/db_name.
+хранится в файле .env.
+
+### Пример файла .env:
+
+    DATABASE_URL=postgresql://username:password@db:5432/db_name
+    POSTGRES_USER=username
+    POSTGRES_PASSWORD=password
+    POSTGRES_DB=db_name
 
 
-## Запуск проекта в виртуальной среде
+## Запуск контейнера
 
-    (venv)$ uvicorn app.main:app --reload
+    $ docker-compose up -d --build
 
-API будет доступно по ссылке: http://127.0.0.1:8000/  
-Документация API (Swagger UI): http://127.0.0.1:8000/docs
+API будет доступно по ссылке: http://0.0.0.0:8000/  
+Документация API (Swagger UI): http://0.0.0.0:8000/docs
