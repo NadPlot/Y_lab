@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  web:
+    container_name: web_api
+    build:
+      context: .
+      dockerfile: Dockerfile
+    command: uvicorn app.main:app --host 0.0.0.0 --reload
+    volumes:
+      - .:/app
+    ports:
+      - 8080:8000
+    env_file:
+      - .env
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    container_name: db_api
+    image: postgres:15.1-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    expose:
+      - 5432
+    env_file:
+      - .env
+    ports:
+      - "8000:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready", "-d", "db_prod"]
+      interval: 30s
+      timeout: 60s
+      retries: 5
+      start_period: 80s
+
+volumes:
+  postgres_data:
