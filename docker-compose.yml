@@ -2,30 +2,37 @@ version: '3.8'
 
 services:
   web:
-    container_name: web_api
+    container_name: api
     build: .
     command: uvicorn app.main:app --host 0.0.0.0 --reload
     volumes:
       - .:/app
     ports:
-      - 8000:8000
-    env_file:
-      - .env
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/postgres
+    networks:
+      - common_network
     depends_on:
       db:
         condition: service_healthy
 
   db:
-    container_name: db_api
+    container_name: db
     image: postgres:15.1-alpine
     volumes:
       - postgres_data:/var/lib/postgresql/data/
     expose:
       - 5432
-    env_file:
-      - .env
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+      - PGUSER=postgres
     ports:
-      - 8080:5432
+      - "8080:5432"
+    networks:
+      - common_network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready"]
       interval: 30s
@@ -34,3 +41,7 @@ services:
 
 volumes:
   postgres_data:
+
+networks:
+  common_network:
+    name: common_network
