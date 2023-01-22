@@ -44,7 +44,7 @@ API будет доступно по ссылке: http://0.0.0.0:8000/
     $ docker-compose -f docker-compose.tests.yml up -d --build
 
 Посмотреть логи
-
+python-dotenv==0.21.0
     $ docker container logs test-api
 
 ## Подключение к БД
@@ -60,7 +60,7 @@ app/main.py
 Alembic не использовала.
 
 ### Пример файла .env:
-Переменные окружения из docker-compose.yml можно вынесни в файл .env:
+При необходимости переменные окружения из docker-compose.yml можно вынесни в файл .env:
 
     DATABASE_URL=postgresql://username:password@db:5432/db_name
     POSTGRES_USER=username
