@@ -60,6 +60,7 @@ app/main.py
 Alembic не использовала.
 
 ### Пример файла .env:
+Для запуска контейнеров и тестов не нужен.
 При необходимости переменные окружения из docker-compose.yml можно вынесни в файл .env:
 
     DATABASE_URL=postgresql://username:password@db:5432/db_name
