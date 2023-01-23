@@ -6,7 +6,7 @@ services:
     build: .
     command: sh -c "echo 'Starting tests...' && pytest -vv"
     environment:
-      - DATABASE_URL=postgresql://postgres:postgres@db:5432/postgres
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/test
       - SQLALCHEMY_SILENCE_UBER_WARNING=1
     networks:
       - test_network
