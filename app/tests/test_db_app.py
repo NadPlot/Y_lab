@@ -1,61 +1,207 @@
-def test_get_menu_list_empty(empty_list_response):
+import pytest
+from fastapi.testclient import TestClient
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+
+from app.database import Base
+from app.main import app, get_db
+
+# При запуске тестов - подключается к БД для тестов
+# БД test создается при запуске контейнера
+DATABASE_URL = "postgresql://postgres:postgres@db:5432/test"
+
+
+engine = create_engine(DATABASE_URL)
+TestingSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
+
+
+Base.metadata.create_all(bind=engine)
+
+
+def override_get_db():
+    try:
+        db = TestingSessionLocal()
+        yield db
+    finally:
+        db.close()
+
+
+app.dependency_overrides[get_db] = override_get_db
+
+client = TestClient(app)
+
+
+@pytest.fixture()  # перенести в conftest.py
+def clear_menus():
+    response = client.get("/api/v1/menus/")
+    for menu in response.json():
+        client.delete(f"/api/v1/menus/{menu['id']}/")
+
+
+@pytest.fixture()
+def menu_id():
+    response = client.get("api/v1/menus")
+    for menu in response.json():
+        return int(menu['id'])
+
+
+@pytest.fixture()
+def submenu_id(menu_id):
+    response = client.get(f"/api/v1/menus/{menu_id}/submenus/")
+    for submenu in response.json():
+        return int(submenu['id'])
+
+
+@pytest.fixture()
+def dish_id(menu_id, submenu_id):
+    response = client.get(f"/api/v1/menus/{menu_id}/submenus/{submenu_id}/dishes/")
+    for dish in response.json():
+        return int(dish['id'])
+
+
+def test_get_menu_list_empty(clear_menus):
     """
     Выдача списка меню.
     Если в БД нет меню, должен вернуть пустой список
     """
-    assert empty_list_response.status_code == 200
-    assert empty_list_response.json() == []
+    response = client.get("/api/v1/menus")
+    assert response.status_code == 200
+    assert response.json() == []
 
 
-# def test_get_menu_not_exists(menu_not_found_response):
-#     """
-#     Просмотр определенного меню.
-#     Если меню не найдено, возвращает сообщение 'menu not found'
-#     """
-#     assert menu_not_found_response.status_code == 404
-#     assert menu_not_found_response.json() == {"detail": "menu not found"}
+def test_get_menu_not_exists(clear_menus):
+    """
+    Просмотр определенного меню.
+    Если меню не найдено, возвращает сообщение 'menu not found'
+    """
+    response = client.get("/api/v1/menus/1")
+    assert response.status_code == 404
+    assert response.json() == {"detail": "menu not found"}
 
-# def test_menu(new_menu):
-#     """
-#     Создание нового меню.
-#     Просмотр определенного меню.
-#     Выдача списка меню.
-#     Удаление меню.
-#     """
 
-#     response = client.post(
-#         "/api/v1/menus",
-#         json=new_menu,
-#     )
-#     assert response.status_code == 201
-#     data = response.json()
-#     assert data["title"] == new_menu["title"]
-#     assert data["description"] == new_menu["description"]
-#     assert "id" in data
-#     assert "submenus_count" in data
-#     assert "dishes_count" in data
-#     menu_id = data["id"]
+def test_add_menu(clear_menus):
+    """
+    Создание нового меню.
+    """
+    data = {"title": "Test Menu", "description": "Test description menu"}
+    response = client.post("/api/v1/menus", json=data)
+    assert response.status_code == 201
+    menu = response.json()
+    assert menu["title"] == data["title"]
+    assert menu["description"] == data["description"]
+    assert "id" in menu
+    assert "submenus_count" in menu
+    assert "dishes_count" in menu
 
-#     response = client.get(f"/api/v1/menus/{int(menu_id)}")
-#     assert response.status_code == 200
-#     data = response.json()
-#     assert data["title"] == new_menu["title"]
-#     assert data["description"] == new_menu["description"]
-#     assert data["id"] == menu_id
 
-#     response = client.get("/api/v1/menus")
-#     assert response.status_code == 200
-#     assert response.json() == [
-#         {
-#             f"id": {menu_id},
-#             "title": new_menu["title"],
-#             "description": new_menu["description"],
-#             "submenus_count": 0,
-#             "dishes_count": 0
-#         }
-#     ]
+def test_get_menu(menu_id):
+    """
+    Просмотр определенного меню.
+    """
+    response = client.get(f"/api/v1/menus/{menu_id}")
+    assert response.status_code == 200
+    menu = response.json()
+    assert "submenus_count" in menu
+    assert "dishes_count" in menu
 
-#     response = client.delete(
-#         "/api/v1/menus/{id}/"
 
-#         )
+def test_update_menu(menu_id):
+    """
+    Обновить меню.
+    """
+    data = {"title": "Test Update Menu", "description": "Test Update description menu"}
+    response = client.patch(f"/api/v1/menus/{menu_id}/", json=data)
+    assert response.status_code == 200
+    menu = response.json()
+    assert menu["title"] == data["title"]
+    assert menu["description"] == data["description"]
+    assert "submenus_count" in menu
+    assert "dishes_count" in menu
+
+
+def test_add_submenu(menu_id):
+    """
+    Создание нового подменю.
+    """
+    data = {"title": "Test Submenu", "description": "Test description Submenu"}
+    response = client.post(f"/api/v1/menus/{menu_id}/submenus", json=data)
+    assert response.status_code == 201
+    menu = response.json()
+    assert menu["title"] == data["title"]
+    assert menu["description"] == data["description"]
+    assert "id" in menu
+    assert "dishes_count" in menu
+
+
+def test_get_sub_menu(menu_id, submenu_id):
+    """
+    Просмотр определенного подменю.
+    """
+    response = client.get(f"/api/v1/menus/{menu_id}/submenus/{submenu_id}/")
+    assert response.status_code == 200
+    menu = response.json()
+    assert "dishes_count" in menu
+
+
+def test_update_submenu(menu_id, submenu_id):
+    """
+    Обновить подменю.
+    """
+    data = {"title": "Test Update Submenu", "description": "Test Update description Submenu"}
+    response = client.patch(f"/api/v1/menus/{menu_id}/submenus/{submenu_id}/", json=data)
+    assert response.status_code == 200
+    menu = response.json()
+    assert menu["title"] == data["title"]
+    assert menu["description"] == data["description"]
+    assert "dishes_count" in menu
+
+
+
+def test_add_dish(menu_id, submenu_id):
+    """
+    Создание нового блюда.
+    """
+    data = {"title": "Test Dish", "description": "Test description Dish", "price": "12.551"}
+    response = client.post(f"/api/v1/menus/{menu_id}/submenus/{submenu_id}/dishes", json=data)
+    assert response.status_code == 201
+    dish = response.json()
+    assert dish["title"] == data["title"]
+    assert dish["description"] == data["description"]
+    assert "id" in dish
+    assert "price" in dish
+    assert dish['price'] == str(round(float(data['price']), 2))
+
+
+def test_update_dish(menu_id, submenu_id, dish_id):
+    """
+    Обновить блюдо.
+    """
+    data = {"title": "Test Update Dish", "description": "Test Update description Dish", "price": "12.4421"}
+    response = client.patch(f"/api/v1/menus/{menu_id}/submenus/{submenu_id}/dishes/{dish_id}", json=data)
+    assert response.status_code == 200
+    dish = response.json()
+    assert dish["title"] == data["title"]
+    assert dish["description"] == data["description"]
+    assert "price" in dish
+    assert dish['price'] == str(round(float(data['price']), 2))
+
+
+def test_delete_submenu(menu_id, submenu_id):
+    """
+    Удалить подменю.
+    """
+    response = client.delete(f"/api/v1/menus/{menu_id}/submenus/{submenu_id}/")
+    assert response.status_code == 200
+    assert response.json() == {"status": "true", "message": "The submenu has been deleted"}
+
+
+def test_delete_menu(menu_id):
+    """
+    Удалить меню.
+    """
+    response = client.delete(f"/api/v1/menus/{menu_id}/")
+    assert response.status_code == 200
+    assert response.json() == {"status": "true", "message": "The menu has been deleted"}
+
+
+

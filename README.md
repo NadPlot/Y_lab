@@ -44,7 +44,6 @@ API будет доступно по ссылке: http://0.0.0.0:8000/
     $ docker-compose -f docker-compose.tests.yml up -d --build
 
 Посмотреть логи
-python-dotenv==0.21.0
 
     $ docker container logs test-api
 
