@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
-
+from app.database import engine
+from app import models
 from app.routers import menu, submenu, dishes
 from app.exceptions import MenuExistsException, SubmenuExistsException
 from app.exceptions import DishExistsException
@@ -12,18 +13,19 @@ description = 'Интенсив по Python (Y_lab)'
 tags_metadata = [
     {
         "name": "Меню",
-        "description": "Операции с меню (CRUD). Просмотр списка меню.",
+        "description": "Создание, обновление, удаление меню. Просмотр списка меню и отдельного меню",
     },
     {
         "name": "Подменю",
-        "description": "Операции с подменю (CRUD). Просмотр списка подменю",
+        "description": "Создание, обновление, удаление подменю. Просмотр списка подменю и отдельного подменю",
     },
     {
         "name": "Блюда",
-        "description": "Операции с блюдами (CRUD). Просмотр списка блюд.",
+        "description": "Создание, обновление, удаление блюд. Просмотр списка блюд и отдельного блюда",
     },
 ]
 
+models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI(
     title="REST API по работе с меню ресторана",

@@ -61,7 +61,7 @@ def update_menu(id: int, data: MenuCreate, db: Session = Depends(get_db)):
 
 
 @router.delete(
-    "/api/v1/menus/{id}/",
+    "/{id}",
     name="Удаление меню",
 )
 def delete_menu(id: int, db: Session = Depends(get_db)):
