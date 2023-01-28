@@ -42,6 +42,7 @@ psycopg2-binary==2.9.5
 uvicorn==0.20.0        
 httpx==0.23.3
 pytest==7.2.1
+redis==4.4.2
 pre-commit==3.0.1
 
 ## Сборка и Запуск контейнера приложение FastAPI и БД PostgreSQL

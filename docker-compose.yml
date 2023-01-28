@@ -16,6 +16,8 @@ services:
     depends_on:
       db:
         condition: service_healthy
+      redis:
+        condition: service_healthy
 
   db:
     container_name: db
@@ -38,6 +40,25 @@ services:
       interval: 30s
       timeout: 60s
       retries: 5
+
+  redis:
+    container_name: redis
+    image: redis:latest
+    volumes:
+      - ./redis/data:/data
+      - ./redis/redis.conf://usr/local/etc/redis/redis.conf
+    expose:
+      - 6379
+    ports:
+      - "9000:6379"
+    command: redis-server /usr/local/etc/redis/redis.conf
+    networks:
+      - common_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 20s
+      retries: 100
 
 volumes:
   postgres_data:

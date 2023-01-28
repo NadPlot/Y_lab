@@ -11,7 +11,6 @@ from app.exceptions import MenuExistsException
 router = APIRouter(
     prefix="/api/v1/menus",
     tags=['Меню'],
-    dependencies=[Depends(get_db)],
 )
 
 

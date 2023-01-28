@@ -1,0 +1,24 @@
+repos:
+-   repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v4.2.0
+    hooks:
+    -   id: trailing-whitespace
+    -   id: check-added-large-files
+    -   id: end-of-file-fixer
+    -   id: check-yaml
+    -   id: check-json
+    -   id: check-case-conflict
+    -   id: check-merge-conflict
+    -   id: double-quote-string-fixer
+-   repo: https://github.com/pycqa/isort
+    rev: 5.10.1
+    hooks:
+    -   id: isort
+        exclude: __init__.py
+        args: [--profile, black, --filter-files]
+-   repo: https://github.com/aso/title/add-trailing-comma
+    rev: v2.2.2
+    hooks:
+    -   id: add-trailing-comma
+        args: [--py310-slim]
+-   repo: https://github.com/pre-commit/mirrors  

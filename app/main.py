@@ -1,6 +1,7 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from app.database import engine
+from .config import settings
 from app import models
 from app.routers import menu, submenu, dishes
 from app.exceptions import MenuExistsException, SubmenuExistsException
