@@ -1,4 +1,3 @@
-import redis
 import json
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
@@ -21,8 +20,15 @@ router = APIRouter(
     response_model=List[MenuBase],
     name="Выдача списка меню"
 )
-def get_menu_list(db: Session = Depends(get_db)):
-    return crud.get_menu_list(db)
+def get_menu_list(db: Session = Depends(get_db), cache: CacheBase = Depends(get_redis)):
+    cached_menus = cache.get('list')
+    if not cached_menus:
+        list_menu = crud.get_menu_list(db)
+        cached_menus = cache.set('list', json.dumps(list_menu))
+        cache.expire('list', 30)
+        return list_menu
+    else:
+        return json.loads(cached_menus)
 
 
 @router.post(
@@ -41,12 +47,12 @@ def add_menu(data: MenuCreate, db: Session = Depends(get_db)):
     response_model=MenuBase,
     name="Просмотр определенного меню",
 )
-def get_menu(id: int, db: Session = Depends(get_db), cache: CacheBase = Depends(get_redis)):
+def get_menu(id: str, db: Session = Depends(get_db), cache: CacheBase = Depends(get_redis)):
     cached_menu = cache.get(id)
     if not cached_menu:
         menu = crud.get_menu(db, id)
         cached_menu = cache.set(id, json.dumps(menu))
-        cache.expire(id, 40)
+        cache.expire(id, 300)
         if not menu:
             raise MenuExistsException()
         return menu
@@ -59,7 +65,7 @@ def get_menu(id: int, db: Session = Depends(get_db), cache: CacheBase = Depends(
     response_model=MenuBase,
     name="Обновить меню",
 )
-def update_menu(id: int, data: MenuCreate, db: Session = Depends(get_db)):
+def update_menu(id: str, data: MenuCreate, db: Session = Depends(get_db)):
     menu = crud.get_menu(db, id)
     if not menu:
         raise MenuExistsException()
@@ -71,7 +77,7 @@ def update_menu(id: int, data: MenuCreate, db: Session = Depends(get_db)):
     "/{id}",
     name="Удаление меню",
 )
-def delete_menu(id: int, db: Session = Depends(get_db)):
+def delete_menu(id: str, db: Session = Depends(get_db)):
     crud.delete_menu(db, id)
     return JSONResponse(
         status_code=200,
