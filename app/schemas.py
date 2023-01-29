@@ -52,3 +52,8 @@ class DishesCreate(BaseModel):
     title: str
     description: str
     price: float
+
+
+# для получения и записи кэша
+class CacheBase(BaseModel):
+    key: str

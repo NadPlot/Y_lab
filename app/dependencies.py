@@ -1,3 +1,4 @@
+import redis
 from app.database import SessionLocal
 
 
@@ -8,3 +9,9 @@ def get_db():
         yield db
     finally:
         db.close()
+
+
+# Dependency (start redis)
+def get_redis():
+    cache = redis.Redis(host='redis', port=6379)
+    return cache

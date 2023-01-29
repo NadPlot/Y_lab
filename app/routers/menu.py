@@ -1,10 +1,12 @@
+import redis
+import json
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 from typing import List
 
-from app.dependencies import get_db
-from app.schemas import MenuBase, MenuCreate
+from app.dependencies import get_db, get_redis
+from app.schemas import MenuBase, MenuCreate, CacheBase
 from app import crud
 from app.exceptions import MenuExistsException
 
@@ -39,11 +41,17 @@ def add_menu(data: MenuCreate, db: Session = Depends(get_db)):
     response_model=MenuBase,
     name="Просмотр определенного меню",
 )
-def get_menu(id: int, db: Session = Depends(get_db)):
-    menu = crud.get_menu(db, id)
-    if not menu:
-        raise MenuExistsException()
-    return menu
+def get_menu(id: int, db: Session = Depends(get_db), cache: CacheBase = Depends(get_redis)):
+    cached_menu = cache.get(id)
+    if not cached_menu:
+        menu = crud.get_menu(db, id)
+        cached_menu = cache.set(id, json.dumps(menu))
+        cache.expire(id, 40)
+        if not menu:
+            raise MenuExistsException()
+        return menu
+    else:
+        return json.loads(cached_menu)
 
 
 @router.patch(
