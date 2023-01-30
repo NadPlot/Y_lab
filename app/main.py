@@ -34,6 +34,11 @@ app = FastAPI(
     title='REST API по работе с меню ресторана',
     description=description,
     openapi_tags=tags_metadata,
+    docs_url='/api/openapi',
+    redoc_url='/api/redoc',
+    # В формате OpenAPI
+    openapi_url='/api/v1/openapi.json',
+    debug='true',
 )
 
 

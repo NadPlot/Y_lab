@@ -20,7 +20,21 @@ router = APIRouter(
     response_model=list[DishesBase],
     name='Выдача списка блюд',
 )
-def get_dishes_list(menu_id: str, submenu_id: str, db: Session = Depends(get_db), cache: CacheBase = Depends(get_redis)):
+def get_dishes_list(
+    menu_id: str,
+    submenu_id: str,
+    db: Session = Depends(get_db),
+    cache: CacheBase = Depends(get_redis),
+):
+    """
+    Просмотр списка блюд по id меню и id подменю:
+
+    - **menu_id**: идентификатор меню
+    - **submenu_id**: идентификатор подменю
+    - **title**: название блюда
+    - **description**: описание блюда
+    - **price**: цена блюда
+    """
     if not cache.get('dishes'):
         list_dishes = crud.get_dishes_list(db, submenu_id)
         cache.set('dishes', json.dumps(list_dishes))
@@ -35,7 +49,23 @@ def get_dishes_list(menu_id: str, submenu_id: str, db: Session = Depends(get_db)
     response_model=DishesBase,
     name='Просмотр определенного блюда',
 )
-def get_dish(submenu_id: str, id: str, db: Session = Depends(get_db), cache: CacheBase = Depends(get_redis)):
+def get_dish(
+    menu_id: str,
+    submenu_id: str,
+    id: str,
+    db: Session = Depends(get_db),
+    cache: CacheBase = Depends(get_redis),
+):
+    """
+    Просмотр определенного блюда по id меню и id подменю:
+
+    - **menu_id**: идентификатор меню
+    - **submenu_id**: идентификатор подменю
+    - **id**: идентификатор блюда
+    - **title**: название блюда
+    - **description**: описание блюда
+    - **price**: цена блюда
+    """
     if not cache.get(id):
         dish = crud.get_dish(db, submenu_id, id)
         cache.set(id, json.dumps(dish))
@@ -53,7 +83,22 @@ def get_dish(submenu_id: str, id: str, db: Session = Depends(get_db), cache: Cac
     name='Создать блюдо',
     status_code=201,
 )
-def add_dish(menu_id: str, submenu_id: str, data: DishesCreate, db: Session = Depends(get_db), cache: CacheBase = Depends(get_redis)):
+def add_dish(
+    menu_id: str,
+    submenu_id: str,
+    data: DishesCreate,
+    db: Session = Depends(get_db),
+    cache: CacheBase = Depends(get_redis),
+):
+    """
+    Создать новое блюдо:
+
+    - **menu_id**: идентификатор меню
+    - **submenu_id**: идентификатор подменю
+    - **title**: название блюда
+    - **description**: описание блюда
+    - **price**: цена блюда
+    """
     dish = crud.create_dish(db, submenu_id, data)
     cache.delete('menu', 'submenu', 'dishes')
     return crud.get_dish(db, submenu_id, dish.id)
@@ -64,7 +109,24 @@ def add_dish(menu_id: str, submenu_id: str, data: DishesCreate, db: Session = De
     response_model=DishesBase,
     name='Обновить блюдо',
 )
-def update_dish(menu_id: str, submenu_id: str, id: str, data: DishesCreate, db: Session = Depends(get_db), cache: CacheBase = Depends(get_redis)):
+def update_dish(
+    menu_id: str,
+    submenu_id: str,
+    id: str,
+    data: DishesCreate,
+    db: Session = Depends(get_db),
+    cache: CacheBase = Depends(get_redis),
+):
+    """
+    Обновить блюдо:
+
+    - **menu_id**: идентификатор меню
+    - **submenu_id**: идентификатор подменю
+    - **id**: идентификатор блюда
+    - **title**: название блюда
+    - **description**: описание блюда
+    - **price**: цена блюда
+    """
     dish = crud.get_dish(db, submenu_id, id)
     if not dish:
         raise DishExistsException()
@@ -78,7 +140,20 @@ def update_dish(menu_id: str, submenu_id: str, id: str, data: DishesCreate, db: 
     '/{id}',
     name='Удалить блюдо',
 )
-def delete_dish(menu_id: str, submenu_id: str, id: str, db: Session = Depends(get_db), cache: CacheBase = Depends(get_redis)):
+def delete_dish(
+    menu_id: str,
+    submenu_id: str,
+    id: str,
+    db: Session = Depends(get_db),
+    cache: CacheBase = Depends(get_redis),
+):
+    """
+    Удалить блюдо:
+
+    - **menu_id**: идентификатор меню
+    - **submenu_id**: идентификатор подменю
+    - **id**: идентификатор блюда
+    """
     crud.delete_dish(db, submenu_id, id)
     cache.delete(id)
     cache.delete('menu', 'submenu', 'dishes')

@@ -25,6 +25,14 @@ def get_submenu_list(
     db: Session = Depends(get_db),
     cache: CacheBase = Depends(get_redis),
 ):
+    """
+    Просмотр списка подменю по id меню:
+
+    - **menu_id**: идентификатор меню
+    - **title**: название подменю
+    - **description**: описание подменю
+    - **dishes_count**: Количество блюд в подменю
+    """
     if not cache.get('submenu'):
         list_submenu = crud.get_submenu_list(db, menu_id)
         cache.set('submenu', json.dumps(list_submenu))
@@ -40,7 +48,19 @@ def get_submenu_list(
     name='Создать подменю',
     status_code=201,
 )
-def add_submenu(menu_id: str, data: SubmenuCreate, db: Session = Depends(get_db), cache: CacheBase = Depends(get_redis)):
+def add_submenu(
+    menu_id: str,
+    data: SubmenuCreate,
+    db: Session = Depends(get_db),
+    cache: CacheBase = Depends(get_redis),
+):
+    """
+    Создать новое подменю:
+
+    - **menu_id**: идентификатор меню
+    - **title**: название подменю
+    - **description**: описание подменю
+    """
     submenu = crud.create_submenu(db, menu_id, data)
     cache.delete('menu', 'submenu')
     return crud.get_submenu(db, menu_id, submenu.id)
@@ -51,7 +71,21 @@ def add_submenu(menu_id: str, data: SubmenuCreate, db: Session = Depends(get_db)
     response_model=SubmenuBase,
     name='Просмотр определенного подменю',
 )
-def get_submenu(menu_id: str, submenu_id: str, db: Session = Depends(get_db), cache: CacheBase = Depends(get_redis)):
+def get_submenu(
+    menu_id: str,
+    submenu_id: str,
+    db: Session = Depends(get_db),
+    cache: CacheBase = Depends(get_redis),
+):
+    """
+    По id меню и id подменю посмотреть подменю:
+
+    - **menu_id**: идентификатор меню
+    - **submenu_id**: идентификатор подменю
+    - **title**: название подменю
+    - **description**: описание подменю
+    - **dishes_count**: Количество блюд в подменю
+    """
     if not cache.get(submenu_id):
         submenu = crud.get_submenu(db, menu_id, submenu_id)
         cache.set(submenu_id, json.dumps(submenu))
@@ -68,7 +102,21 @@ def get_submenu(menu_id: str, submenu_id: str, db: Session = Depends(get_db), ca
     response_model=SubmenuBase,
     name='Обновить подменю',
 )
-def update_submenu(menu_id: str, submenu_id: str, data: SubmenuCreate, db: Session = Depends(get_db), cache: CacheBase = Depends(get_redis)):
+def update_submenu(
+    menu_id: str,
+    submenu_id: str,
+    data: SubmenuCreate,
+    db: Session = Depends(get_db),
+    cache: CacheBase = Depends(get_redis),
+):
+    """
+    По id меню и id подменю обновить подменю:
+
+    - **menu_id**: идентификатор меню
+    - **submenu_id**: идентификатор подменю
+    - **title**: название подменю
+    - **description**: описание подменю
+    """
     submenu = crud.get_submenu(db, menu_id, submenu_id)
     if not submenu:
         raise SubmenuExistsException()
@@ -82,7 +130,18 @@ def update_submenu(menu_id: str, submenu_id: str, data: SubmenuCreate, db: Sessi
     '/{submenu_id}',
     name='Удаление подменю',
 )
-def delete_submenu(menu_id: str, submenu_id: str, db: Session = Depends(get_db), cache: CacheBase = Depends(get_redis)):
+def delete_submenu(
+    menu_id: str,
+    submenu_id: str,
+    db: Session = Depends(get_db),
+    cache: CacheBase = Depends(get_redis),
+):
+    """
+    По id меню и id подменю удалить подменю:
+
+    - **menu_id**: идентификатор меню
+    - **submenu_id**: идентификатор подменю
+    """
     crud.delete_submenu(db, menu_id, submenu_id)
     cache.delete(menu_id, submenu_id)
     cache.delete('menu', 'submenu', 'dishes')
