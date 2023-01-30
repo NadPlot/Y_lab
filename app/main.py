@@ -1,11 +1,10 @@
 from fastapi import FastAPI, Request
 from fastapi.responses import JSONResponse
 from app.database import engine
-from .config import settings
+from app.config import settings
 from app import models
 from app.routers import menu, submenu, dishes
-from app.exceptions import MenuExistsException, SubmenuExistsException
-from app.exceptions import DishExistsException
+from app.exceptions import MenuExistsException, SubmenuExistsException, DishExistsException
 
 
 description = 'Интенсив по Python (Y_lab)'
@@ -14,15 +13,15 @@ description = 'Интенсив по Python (Y_lab)'
 tags_metadata = [
     {
         "name": "Меню",
-        "description": "Создание, обновление, удаление меню. Просмотр списка меню и отдельного меню",
+        "description": "Операции CRUD меню. Просмотр списка меню, отдельного меню",
     },
     {
         "name": "Подменю",
-        "description": "Создание, обновление, удаление подменю. Просмотр списка подменю и отдельного подменю",
+        "description": "Операции CRUD подменю. Просмотр списка подменю, отдельного подменю",
     },
     {
         "name": "Блюда",
-        "description": "Создание, обновление, удаление блюд. Просмотр списка блюд и отдельного блюда",
+        "description": "Операции CRUD блюд. Просмотр списка блюд, отдельного блюда",
     },
 ]
 

@@ -21,14 +21,13 @@ router = APIRouter(
     name="Выдача списка меню"
 )
 def get_menu_list(db: Session = Depends(get_db), cache: CacheBase = Depends(get_redis)):
-    cached_menus = cache.get('list')
-    if not cached_menus:
+    if not cache.get('menu'):
         list_menu = crud.get_menu_list(db)
-        cached_menus = cache.set('list', json.dumps(list_menu))
-        cache.expire('list', 30)
+        cache.set('menu', json.dumps(list_menu))
+        cache.expire('menu', 300)
         return list_menu
     else:
-        return json.loads(cached_menus)
+        return json.loads(cache.get('menu'))
 
 
 @router.post(
@@ -37,8 +36,9 @@ def get_menu_list(db: Session = Depends(get_db), cache: CacheBase = Depends(get_
     name='Создать меню',
     status_code=201,
 )
-def add_menu(data: MenuCreate, db: Session = Depends(get_db)):
+def add_menu(data: MenuCreate, db: Session = Depends(get_db), cache: CacheBase = Depends(get_redis)):
     menu = crud.create_menu(db, data)
+    cache.delete('menu')
     return crud.get_menu(db, menu.id)
 
 
@@ -48,16 +48,15 @@ def add_menu(data: MenuCreate, db: Session = Depends(get_db)):
     name="Просмотр определенного меню",
 )
 def get_menu(id: str, db: Session = Depends(get_db), cache: CacheBase = Depends(get_redis)):
-    cached_menu = cache.get(id)
-    if not cached_menu:
+    if not cache.get(id):
         menu = crud.get_menu(db, id)
-        cached_menu = cache.set(id, json.dumps(menu))
+        cache.set(id, json.dumps(menu))
         cache.expire(id, 300)
         if not menu:
             raise MenuExistsException()
         return menu
     else:
-        return json.loads(cached_menu)
+        return json.loads(cache.get(id))
 
 
 @router.patch(
@@ -65,11 +64,13 @@ def get_menu(id: str, db: Session = Depends(get_db), cache: CacheBase = Depends(
     response_model=MenuBase,
     name="Обновить меню",
 )
-def update_menu(id: str, data: MenuCreate, db: Session = Depends(get_db)):
+def update_menu(id: str, data: MenuCreate, db: Session = Depends(get_db), cache: CacheBase = Depends(get_redis)):
     menu = crud.get_menu(db, id)
     if not menu:
         raise MenuExistsException()
     update_menu = crud.update_menu(db, id, data)
+    cache.delete(id)
+    cache.delete('menu')
     return crud.get_menu(db, update_menu.id)
 
 
@@ -77,8 +78,11 @@ def update_menu(id: str, data: MenuCreate, db: Session = Depends(get_db)):
     "/{id}",
     name="Удаление меню",
 )
-def delete_menu(id: str, db: Session = Depends(get_db)):
+def delete_menu(id: str, db: Session = Depends(get_db), cache: CacheBase = Depends(get_redis)):
     crud.delete_menu(db, id)
+    cache.delete(id)
+    cache.delete('menu', 'submenu', 'dishes')
+
     return JSONResponse(
         status_code=200,
         content={"status": "true", "message": "The menu has been deleted"}

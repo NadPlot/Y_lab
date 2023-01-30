@@ -16,18 +16,18 @@ def clear_menus():
 def menu_id():
     response = client.get("api/v1/menus")
     for menu in response.json():
-        return int(menu['id'])
+        return menu['id']
 
 
 @pytest.fixture()
 def submenu_id(menu_id):
     response = client.get(f"/api/v1/menus/{menu_id}/submenus/")
     for submenu in response.json():
-        return int(submenu['id'])
+        return submenu['id']
 
 
 @pytest.fixture()
 def dish_id(menu_id, submenu_id):
     response = client.get(f"/api/v1/menus/{menu_id}/submenus/{submenu_id}/dishes/")
     for dish in response.json():
-        return int(dish['id'])
+        return dish['id']

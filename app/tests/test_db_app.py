@@ -30,6 +30,7 @@ app.dependency_overrides[get_db] = override_get_db
 
 client = TestClient(app)
 
+test_id = 'f7ec56be-f27b-4603-8416-03667696d6c6'
 
 def test_get_menu_list_empty(clear_menus):
     """
@@ -46,7 +47,7 @@ def test_get_menu_not_exists(clear_menus):
     Просмотр определенного меню.
     Не найдено меню
     """
-    response = client.get("/api/v1/menus/1")
+    response = client.get(f"/api/v1/menus/{test_id}")
     assert response.status_code == 404
     assert response.json() == {"detail": "menu not found"}
 
@@ -56,7 +57,7 @@ def test_get_submenu_list_empty(clear_menus):
     Выдача списка подменю.
     Нет подменю
     """
-    response = client.get("/api/v1/menus/1/submenus")
+    response = client.get(f"/api/v1/menus/{test_id}/submenus")
     assert response.status_code == 200
     assert response.json() == []
 
@@ -66,7 +67,7 @@ def test_get_submenu_not_exists(clear_menus):
     Просмотр определенного подменю.
     Не найдено подменю
     """
-    response = client.get("/api/v1/menus/1/submenus/1/")
+    response = client.get(f"/api/v1/menus/{test_id}/submenus/{test_id}/")
     assert response.status_code == 404
     assert response.json() == {"detail": "submenu not found"}
 
@@ -76,7 +77,7 @@ def test_get_dish_list_empty(clear_menus):
     Просмотр списка блюд.
     Не найдено блюд
     """
-    response = client.get("/api/v1/menus/1/submenus/1/dishes")
+    response = client.get(f"/api/v1/menus/{test_id}/submenus/{test_id}/dishes")
     assert response.status_code == 200
     assert response.json() == []
 
@@ -86,7 +87,7 @@ def test_get_dish_not_exists(clear_menus):
     Просмотр определенного блюда.
     Не найдено блюдо
     """
-    response = client.get("/api/v1/menus/1/submenus/1/dishes/1")
+    response = client.get(f"/api/v1/menus/{test_id}/submenus/{test_id}/dishes/{test_id}")
     assert response.status_code == 404
     assert response.json() == {"detail": "dish not found"}
 

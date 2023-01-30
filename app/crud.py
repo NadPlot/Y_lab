@@ -121,7 +121,7 @@ def get_dish(db: Session, submenu_id: str, id: str):
     dish = db.query(models.Dishes).filter(models.Dishes.submenu_id == submenu_id).filter(models.Dishes.id == id).first()
     if not dish:
         raise DishExistsException()
-    return dish
+    return jsonable_encoder(dish)
 
 
 # Создать блюдо
