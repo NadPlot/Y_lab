@@ -1,7 +1,8 @@
-from sqlalchemy import Column
-from sqlalchemy.dialects.postgresql import UUID
-from sqlalchemy import String, Float, ForeignKey
 from uuid import uuid4
+
+from sqlalchemy import Column, Float, ForeignKey, String
+from sqlalchemy.dialects.postgresql import UUID
+
 from app.database import Base
 
 
@@ -19,7 +20,11 @@ class Submenu(Base):
     id = Column(UUID(as_uuid=True), default=uuid4, primary_key=True)
     title = Column(String, nullable=False)
     description = Column(String, nullable=False)
-    menu_id = Column(UUID(as_uuid=True), ForeignKey('menu.id', ondelete='CASCADE'), nullable=False)
+    menu_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey('menu.id', ondelete='CASCADE'),
+        nullable=False,
+    )
 
 
 class Dishes(Base):
@@ -29,4 +34,8 @@ class Dishes(Base):
     title = Column(String, nullable=False)
     description = Column(String, nullable=False)
     price = Column(Float, nullable=False, default=0.00)
-    submenu_id = Column(UUID(as_uuid=True), ForeignKey('submenu.id', ondelete='CASCADE'), nullable=False)
+    submenu_id = Column(
+        UUID(as_uuid=True),
+        ForeignKey('submenu.id', ondelete='CASCADE'),
+        nullable=False,
+    )

@@ -2,7 +2,7 @@ version: '3.8'
 
 services:
   test_web:
-    container_name: test_api
+    container_name: test
     build: .
     command: sh -c "echo 'Starting tests...' && pytest -vv"
     environment:
@@ -10,7 +10,7 @@ services:
       - SQLALCHEMY_SILENCE_UBER_WARNING=1
     networks:
       - test_network
-    
+
 
 networks:
   test_network:

@@ -1,30 +1,29 @@
 import json
+
 from fastapi import APIRouter, Depends
-from sqlalchemy.orm import Session
 from fastapi.responses import JSONResponse
-from typing import List
+from sqlalchemy.orm import Session
 
-from app.dependencies import get_db, get_redis
-from app.schemas import SubmenuBase, SubmenuCreate, CacheBase
 from app import crud
+from app.dependencies import get_db, get_redis
 from app.exceptions import SubmenuExistsException
-
+from app.schemas import CacheBase, SubmenuBase, SubmenuCreate
 
 router = APIRouter(
-    prefix="/api/v1/menus/{menu_id}/submenus",
+    prefix='/api/v1/menus/{menu_id}/submenus',
     tags=['Подменю'],
 )
 
 
 @router.get(
-    "/",
-    response_model=List[SubmenuBase],
-    name="Просмотр списка подменю",
+    '/',
+    response_model=list[SubmenuBase],
+    name='Просмотр списка подменю',
 )
 def get_submenu_list(
     menu_id: str,
     db: Session = Depends(get_db),
-    cache: CacheBase = Depends(get_redis)
+    cache: CacheBase = Depends(get_redis),
 ):
     if not cache.get('submenu'):
         list_submenu = crud.get_submenu_list(db, menu_id)
@@ -36,7 +35,7 @@ def get_submenu_list(
 
 
 @router.post(
-    "/",
+    '/',
     response_model=SubmenuBase,
     name='Создать подменю',
     status_code=201,
@@ -48,9 +47,9 @@ def add_submenu(menu_id: str, data: SubmenuCreate, db: Session = Depends(get_db)
 
 
 @router.get(
-    "/{submenu_id}",
+    '/{submenu_id}',
     response_model=SubmenuBase,
-    name="Просмотр определенного подменю",
+    name='Просмотр определенного подменю',
 )
 def get_submenu(menu_id: str, submenu_id: str, db: Session = Depends(get_db), cache: CacheBase = Depends(get_redis)):
     if not cache.get(submenu_id):
@@ -65,9 +64,9 @@ def get_submenu(menu_id: str, submenu_id: str, db: Session = Depends(get_db), ca
 
 
 @router.patch(
-    "/{submenu_id}",
+    '/{submenu_id}',
     response_model=SubmenuBase,
-    name="Обновить подменю",
+    name='Обновить подменю',
 )
 def update_submenu(menu_id: str, submenu_id: str, data: SubmenuCreate, db: Session = Depends(get_db), cache: CacheBase = Depends(get_redis)):
     submenu = crud.get_submenu(db, menu_id, submenu_id)
@@ -80,8 +79,8 @@ def update_submenu(menu_id: str, submenu_id: str, data: SubmenuCreate, db: Sessi
 
 
 @router.delete(
-    "/{submenu_id}",
-    name="Удаление подменю",
+    '/{submenu_id}',
+    name='Удаление подменю',
 )
 def delete_submenu(menu_id: str, submenu_id: str, db: Session = Depends(get_db), cache: CacheBase = Depends(get_redis)):
     crud.delete_submenu(db, menu_id, submenu_id)
@@ -89,5 +88,5 @@ def delete_submenu(menu_id: str, submenu_id: str, db: Session = Depends(get_db),
     cache.delete('menu', 'submenu', 'dishes')
     return JSONResponse(
         status_code=200,
-        content={"status": "true", "message": "The submenu has been deleted"}
+        content={'status': 'true', 'message': 'The submenu has been deleted'},
     )

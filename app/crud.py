@@ -1,7 +1,12 @@
-from sqlalchemy.orm import Session
 from fastapi.encoders import jsonable_encoder
+from sqlalchemy.orm import Session
+
 from app import models, schemas
-from app.exceptions import MenuExistsException, SubmenuExistsException, DishExistsException
+from app.exceptions import (
+    DishExistsException,
+    MenuExistsException,
+    SubmenuExistsException,
+)
 
 
 # Просмотр определенного меню
@@ -11,14 +16,18 @@ def get_menu(db: Session, id: str):
         raise MenuExistsException()
     result = jsonable_encoder(menu)
 
-    submenus = db.query(models.Submenu).filter(models.Submenu.menu_id == id).all()
+    submenus = db.query(models.Submenu).filter(
+        models.Submenu.menu_id == id,
+    ).all()
     if not submenus:
         result['submenus_count'] = 0
         result['dishes_count'] = 0
     else:
         result['submenus_count'] = len(submenus)
         for submenu in submenus:
-            dishes = db.query(models.Dishes).filter(models.Dishes.submenu_id == submenu.id).all()
+            dishes = db.query(models.Dishes).filter(
+                models.Dishes.submenu_id == submenu.id,
+            ).all()
             if not dishes:
                 result['dishes_count'] = 0
             else:
@@ -65,11 +74,15 @@ def delete_menu(db: Session, id: str):
 
 # Просмотр определенного подменю
 def get_submenu(db: Session, menu_id: str, submenu_id: str):
-    submenu = db.query(models.Submenu).filter(models.Submenu.menu_id == menu_id).filter(models.Submenu.id == submenu_id).first()
+    submenu = db.query(models.Submenu).filter(
+        models.Submenu.menu_id == menu_id,
+    ).filter(models.Submenu.id == submenu_id).first()
     if not submenu:
         raise SubmenuExistsException()
     result = jsonable_encoder(submenu)
-    dishes = db.query(models.Dishes).filter(models.Dishes.submenu_id == submenu.id).all()
+    dishes = db.query(models.Dishes).filter(
+        models.Dishes.submenu_id == submenu.id,
+    ).all()
     if not dishes:
         result['dishes_count'] = 0
     else:
@@ -79,11 +92,16 @@ def get_submenu(db: Session, menu_id: str, submenu_id: str):
 
 # Просмотр списка подменю
 def get_submenu_list(db: Session, menu_id: str):
-    all_submenu = db.query(models.Submenu).filter(models.Submenu.menu_id == menu_id).all()
+    all_submenu = db.query(models.Submenu).filter(
+        models.Submenu.menu_id == menu_id,
+    ).all()
     if not all_submenu:
         return []
     else:
-        list_submenu = [get_submenu(db, menu_id, submenu.id) for submenu in all_submenu]
+        list_submenu = [
+            get_submenu(db, menu_id, submenu.id)
+            for submenu in all_submenu
+        ]
         return list_submenu
 
 
@@ -98,7 +116,9 @@ def create_submenu(db: Session, menu_id: str, submenu: schemas.SubmenuCreate):
 
 # Обновление подменю
 def update_submenu(db: Session, menu_id: str, submenu_id: str, update_submenu: schemas.SubmenuCreate):
-    db_submenu = db.query(models.Submenu).filter(models.Submenu.menu_id == menu_id).filter(models.Submenu.id == submenu_id).first()
+    db_submenu = db.query(models.Submenu).filter(
+        models.Submenu.menu_id == menu_id,
+    ).filter(models.Submenu.id == submenu_id).first()
     if not db_submenu:
         raise SubmenuExistsException()
     else:
@@ -111,14 +131,18 @@ def update_submenu(db: Session, menu_id: str, submenu_id: str, update_submenu: s
 
 # Удаление подменю
 def delete_submenu(db: Session, menu_id: str, submenu_id: str):
-    db_submenu = db.query(models.Submenu).filter(models.Submenu.menu_id == menu_id).filter(models.Submenu.id == submenu_id).first()
+    db_submenu = db.query(models.Submenu).filter(
+        models.Submenu.menu_id == menu_id,
+    ).filter(models.Submenu.id == submenu_id).first()
     db.delete(db_submenu)
     db.commit()
 
 
 # Просмотр определенного блюда
 def get_dish(db: Session, submenu_id: str, id: str):
-    dish = db.query(models.Dishes).filter(models.Dishes.submenu_id == submenu_id).filter(models.Dishes.id == id).first()
+    dish = db.query(models.Dishes).filter(
+        models.Dishes.submenu_id == submenu_id,
+    ).filter(models.Dishes.id == id).first()
     if not dish:
         raise DishExistsException()
     return jsonable_encoder(dish)
@@ -136,7 +160,9 @@ def create_dish(db: Session, submenu_id: str, dish: schemas.DishesCreate):
 
 # Обновить блюдо
 def update_dish(db: Session, submenu_id: str, id: str, update_dish: schemas.DishesCreate):
-    db_dish = db.query(models.Dishes).filter(models.Dishes.submenu_id == submenu_id).filter(models.Dishes.id == id).first()
+    db_dish = db.query(models.Dishes).filter(
+        models.Dishes.submenu_id == submenu_id,
+    ).filter(models.Dishes.id == id).first()
     if not db_dish:
         raise DishExistsException()
     else:
@@ -150,16 +176,23 @@ def update_dish(db: Session, submenu_id: str, id: str, update_dish: schemas.Dish
 
 # Просмотр списка блюд
 def get_dishes_list(db: Session, submenu_id: str):
-    all_dishes = db.query(models.Dishes).filter(models.Dishes.submenu_id == submenu_id).all()
+    all_dishes = db.query(models.Dishes).filter(
+        models.Dishes.submenu_id == submenu_id,
+    ).all()
     if not all_dishes:
         return []
     else:
-        list_dishes = [get_dish(db, submenu_id, dish.id) for dish in all_dishes]
+        list_dishes = [
+            get_dish(db, submenu_id, dish.id)
+            for dish in all_dishes
+        ]
         return list_dishes
 
 
 # Удаление блюда
 def delete_dish(db: Session, submenu_id: str, id: str):
-    db_dish = db.query(models.Dishes).filter(models.Dishes.submenu_id == submenu_id).filter(models.Dishes.id == id).first()
+    db_dish = db.query(models.Dishes).filter(
+        models.Dishes.submenu_id == submenu_id,
+    ).filter(models.Dishes.id == id).first()
     db.delete(db_dish)
     db.commit()

@@ -1,24 +1,24 @@
 import json
+
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
-from typing import List
 
-from app.dependencies import get_db, get_redis
-from app.schemas import MenuBase, MenuCreate, CacheBase
 from app import crud
+from app.dependencies import get_db, get_redis
 from app.exceptions import MenuExistsException
+from app.schemas import CacheBase, MenuBase, MenuCreate
 
 router = APIRouter(
-    prefix="/api/v1/menus",
+    prefix='/api/v1/menus',
     tags=['Меню'],
 )
 
 
 @router.get(
-    "/",
-    response_model=List[MenuBase],
-    name="Выдача списка меню"
+    '/',
+    response_model=list[MenuBase],
+    name='Выдача списка меню',
 )
 def get_menu_list(db: Session = Depends(get_db), cache: CacheBase = Depends(get_redis)):
     if not cache.get('menu'):
@@ -31,7 +31,7 @@ def get_menu_list(db: Session = Depends(get_db), cache: CacheBase = Depends(get_
 
 
 @router.post(
-    "/",
+    '/',
     response_model=MenuBase,
     name='Создать меню',
     status_code=201,
@@ -43,9 +43,9 @@ def add_menu(data: MenuCreate, db: Session = Depends(get_db), cache: CacheBase =
 
 
 @router.get(
-    "/{id}",
+    '/{id}',
     response_model=MenuBase,
-    name="Просмотр определенного меню",
+    name='Просмотр определенного меню',
 )
 def get_menu(id: str, db: Session = Depends(get_db), cache: CacheBase = Depends(get_redis)):
     if not cache.get(id):
@@ -60,9 +60,9 @@ def get_menu(id: str, db: Session = Depends(get_db), cache: CacheBase = Depends(
 
 
 @router.patch(
-    "/{id}",
+    '/{id}',
     response_model=MenuBase,
-    name="Обновить меню",
+    name='Обновить меню',
 )
 def update_menu(id: str, data: MenuCreate, db: Session = Depends(get_db), cache: CacheBase = Depends(get_redis)):
     menu = crud.get_menu(db, id)
@@ -75,8 +75,8 @@ def update_menu(id: str, data: MenuCreate, db: Session = Depends(get_db), cache:
 
 
 @router.delete(
-    "/{id}",
-    name="Удаление меню",
+    '/{id}',
+    name='Удаление меню',
 )
 def delete_menu(id: str, db: Session = Depends(get_db), cache: CacheBase = Depends(get_redis)):
     crud.delete_menu(db, id)
@@ -85,5 +85,5 @@ def delete_menu(id: str, db: Session = Depends(get_db), cache: CacheBase = Depen
 
     return JSONResponse(
         status_code=200,
-        content={"status": "true", "message": "The menu has been deleted"}
+        content={'status': 'true', 'message': 'The menu has been deleted'},
     )

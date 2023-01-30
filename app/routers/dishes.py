@@ -1,26 +1,24 @@
 import json
+
 from fastapi import APIRouter, Depends
 from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
-from typing import List
 
-from app.dependencies import get_db, get_redis
-from app.schemas import DishesBase, DishesCreate, CacheBase
 from app import crud
+from app.dependencies import get_db, get_redis
 from app.exceptions import DishExistsException
-
+from app.schemas import CacheBase, DishesBase, DishesCreate
 
 router = APIRouter(
-    prefix="/api/v1/menus/{menu_id}/submenus/{submenu_id}/dishes",
+    prefix='/api/v1/menus/{menu_id}/submenus/{submenu_id}/dishes',
     tags=['Блюда'],
 )
 
 
-
 @router.get(
-    "/",
-    response_model=List[DishesBase],
-    name="Выдача списка блюд",
+    '/',
+    response_model=list[DishesBase],
+    name='Выдача списка блюд',
 )
 def get_dishes_list(menu_id: str, submenu_id: str, db: Session = Depends(get_db), cache: CacheBase = Depends(get_redis)):
     if not cache.get('dishes'):
@@ -33,9 +31,9 @@ def get_dishes_list(menu_id: str, submenu_id: str, db: Session = Depends(get_db)
 
 
 @router.get(
-    "/{id}",
+    '/{id}',
     response_model=DishesBase,
-    name="Просмотр определенного блюда",
+    name='Просмотр определенного блюда',
 )
 def get_dish(submenu_id: str, id: str, db: Session = Depends(get_db), cache: CacheBase = Depends(get_redis)):
     if not cache.get(id):
@@ -50,7 +48,7 @@ def get_dish(submenu_id: str, id: str, db: Session = Depends(get_db), cache: Cac
 
 
 @router.post(
-    "/",
+    '/',
     response_model=DishesBase,
     name='Создать блюдо',
     status_code=201,
@@ -62,9 +60,9 @@ def add_dish(menu_id: str, submenu_id: str, data: DishesCreate, db: Session = De
 
 
 @router.patch(
-    "/{id}",
+    '/{id}',
     response_model=DishesBase,
-    name="Обновить блюдо",
+    name='Обновить блюдо',
 )
 def update_dish(menu_id: str, submenu_id: str, id: str, data: DishesCreate, db: Session = Depends(get_db), cache: CacheBase = Depends(get_redis)):
     dish = crud.get_dish(db, submenu_id, id)
@@ -77,8 +75,8 @@ def update_dish(menu_id: str, submenu_id: str, id: str, data: DishesCreate, db: 
 
 
 @router.delete(
-    "/{id}",
-    name="Удалить блюдо",
+    '/{id}',
+    name='Удалить блюдо',
 )
 def delete_dish(menu_id: str, submenu_id: str, id: str, db: Session = Depends(get_db), cache: CacheBase = Depends(get_redis)):
     crud.delete_dish(db, submenu_id, id)
@@ -86,5 +84,5 @@ def delete_dish(menu_id: str, submenu_id: str, id: str, db: Session = Depends(ge
     cache.delete('menu', 'submenu', 'dishes')
     return JSONResponse(
         status_code=200,
-        content={"status": "true", "message": "The dish has been deleted"}
+        content={'status': 'true', 'message': 'The dish has been deleted'},
     )
