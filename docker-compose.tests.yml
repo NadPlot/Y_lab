@@ -1,18 +1,69 @@
 version: '3.8'
 
 services:
-  test_web:
-    container_name: test
+  web:
+    container_name: api
     build: .
-    command: sh -c "echo 'Starting tests...' && pytest -vv"
+    command: uvicorn app.main:app --host 0.0.0.0 --reload
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
     environment:
       - DATABASE_URL=postgresql://postgres:postgres@db:5432/test
       - SQLALCHEMY_SILENCE_UBER_WARNING=1
     networks:
-      - test_network
+      - common_network
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
 
+  db:
+    container_name: db
+    image: postgres:15.1-alpine
+    volumes:
+      - postgres_data:/var/lib/postgresql/data/
+    expose:
+      - 5432
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=test
+      - PGUSER=postgres
+    ports:
+      - "8080:5432"
+    networks:
+      - common_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready"]
+      interval: 30s
+      timeout: 60s
+      retries: 5
+
+  redis:
+    container_name: redis
+    image: redis:latest
+    volumes:
+      - ./redis/data:/data
+      - ./redis/redis.conf://usr/local/etc/redis/redis.conf
+    expose:
+      - 6379
+    ports:
+      - "9000:6379"
+    command: redis-server /usr/local/etc/redis/redis.conf
+    networks:
+      - common_network
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 20s
+      retries: 100
+
+volumes:
+  postgres_data:
 
 networks:
-  test_network:
-    external:
-      name: common_network
+  common_network:
+    name: common_network

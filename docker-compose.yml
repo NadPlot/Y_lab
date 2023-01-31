@@ -29,7 +29,7 @@ services:
     environment:
       - POSTGRES_USER=postgres
       - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=test
+      - POSTGRES_DB=postgres
       - PGUSER=postgres
     ports:
       - "8080:5432"
