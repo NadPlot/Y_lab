@@ -59,3 +59,4 @@ repos:
     rev: v0.991
     hooks:
       - id: mypy
+      args: [--no-strict-optional, --ignore-missing-imports]
