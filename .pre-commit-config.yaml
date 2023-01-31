@@ -59,3 +59,5 @@ repos:
     rev: v0.991
     hooks:
       - id: mypy
+        verbose: true
+        additional_dependencies: ['types-redis']

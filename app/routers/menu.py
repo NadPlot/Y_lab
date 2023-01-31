@@ -6,7 +6,8 @@ from fastapi.responses import JSONResponse
 from sqlalchemy.orm import Session
 
 from app import crud
-from app.dependencies import get_db, get_redis
+from app.cache import get_redis
+from app.dependencies import get_db
 from app.exceptions import MenuExistsException
 from app.schemas import CacheBase, MenuBase, MenuCreate
 
