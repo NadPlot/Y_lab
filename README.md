@@ -41,6 +41,8 @@ REST API по работе с меню ресторана
 
 ВАЖНО: переписала models.py (id: int -> id: UUID)
 
+Нужен файл .env для запуска
+
 ## Сборка и Запуск контейнера приложение FastAPI, PostgreSQL, Redis
 
     $ docker-compose up -d --build
@@ -49,14 +51,13 @@ API будет доступно по ссылке: http://0.0.0.0:8000/
 Документация API (Swagger UI): http://0.0.0.0:8000/api/openapi
 Документация в формате OpenAPI: http://0.0.0.0:8000/api/v1/openapi.json
 
+
+Нужен файл .env.tests для запуска
 ## Сборка и запуск контейнера для тестирования приложения FastAPI
-после запуска основного контейнера
 
     $ docker-compose -f docker-compose.tests.yml up -d --build
 
-Посмотреть логи
-
-    $ docker container logs test
+Postman тесты запускала после тестов pytest
 
 ## Подключение к БД
 
@@ -77,6 +78,15 @@ Alembic не использовала.
     POSTGRES_PASSWORD=postgres
     POSTGRES_DB=postgres
     PGUSER=postgres
+
+### Пример файла .env.tests:
+
+    DATABASE_URL=postgresql://postgres:postgres@db:5432/test
+    POSTGRES_USER=postgres
+    POSTGRES_PASSWORD=postgres
+    POSTGRES_DB=test
+    PGUSER=postgres
+    SQLALCHEMY_SILENCE_UBER_WARNING=1
 
 ## Requirements
 
@@ -112,4 +122,3 @@ types-pyOpenSSL==23.0.0.2
 types-redis==4.4.0.4
 typing_extensions==4.4.0
 uvicorn==0.20.0
-
