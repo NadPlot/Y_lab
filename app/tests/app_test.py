@@ -2,16 +2,12 @@ from fastapi.testclient import TestClient
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
 
+from app.config import settings
 from app.database import Base
 from app.dependencies import get_db
 from app.main import app
 
-# При запуске тестов - подключается к БД для тестов
-# БД test создается при запуске контейнера
-DATABASE_URL = 'postgresql://postgres:postgres@db:5432/test'
-
-
-engine = create_engine(DATABASE_URL)
+engine = create_engine(settings.db_url)
 TestingSessionLocal = sessionmaker(
     autocommit=False, autoflush=False, bind=engine,
 )
