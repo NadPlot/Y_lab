@@ -1,13 +1,12 @@
 version: '3.8'
 
 services:
-  web:
-    container_name: api
+  test_web:
+    container_name: api_test
     build: .
     entrypoint:
       sh -c "echo 'Starting tests...' &&
-      pytest -vv &&
-      uvicorn app.main:app --host 0.0.0.0 --reload"
+      pytest -vv"
     volumes:
       - .:/app
     ports:
@@ -22,8 +21,8 @@ services:
       redis:
         condition: service_healthy
 
-  db:
-    container_name: db
+  test_db:
+    container_name: db_test
     image: postgres:15.1-alpine
     volumes:
       - postgres_data:/var/lib/postgresql/data/
@@ -41,8 +40,8 @@ services:
       timeout: 60s
       retries: 5
 
-  redis:
-    container_name: redis
+  test_redis:
+    container_name: redis_test
     image: redis:latest
     volumes:
       - ./redis/data:/data
