@@ -11,3 +11,8 @@ def get_redis():
         yield cache
     finally:
         cache.quit()
+
+
+class CacheBase:
+    def __init__(self):
+        pass

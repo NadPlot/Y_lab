@@ -4,6 +4,7 @@ from fastapi.encoders import jsonable_encoder
 from sqlalchemy.orm import Session
 
 from app import models, schemas
+from app.cache import CacheBase
 from app.exceptions import (
     DishExistsException,
     MenuExistsException,
@@ -11,8 +12,18 @@ from app.exceptions import (
 )
 
 
+# class Menu:
+#     def __init__(self, db, id, model):
+#         self.db = db
+#         self.id = id
+#         self.model = model
+
+#     def __str__(self):
+#         return 'a {self.id} car'.format(self=self)
+
+
 # Просмотр определенного меню
-def get_menu(db: Session, id: str, cache: schemas.CacheBase):
+def get_menu(db: Session, id: str, cache: CacheBase):
     if not cache.get(id):
         menu = db.query(models.Menu).filter(models.Menu.id == id).first()
         if not menu:
@@ -43,7 +54,7 @@ def get_menu(db: Session, id: str, cache: schemas.CacheBase):
 
 
 # Выдача списка меню
-def get_menu_list(db: Session, cache: schemas.CacheBase):
+def get_menu_list(db: Session, cache: CacheBase):
     if not cache.get('menu'):
         all_menu = db.query(models.Menu).all()
         if not all_menu:
@@ -61,7 +72,7 @@ def get_menu_list(db: Session, cache: schemas.CacheBase):
 
 
 # Создание меню
-def create_menu(db: Session, menu: schemas.MenuCreate, cache: schemas.CacheBase):
+def create_menu(db: Session, menu: schemas.MenuCreate, cache: CacheBase):
     new_menu = models.Menu(**menu.dict())
     db.add(new_menu)
     db.commit()
@@ -74,7 +85,7 @@ def create_menu(db: Session, menu: schemas.MenuCreate, cache: schemas.CacheBase)
 
 
 # Обновление меню
-def update_menu(db: Session, id: str, update_menu: schemas.MenuCreate, cache: schemas.CacheBase):
+def update_menu(db: Session, id: str, update_menu: schemas.MenuCreate, cache: CacheBase):
     db_menu = db.query(models.Menu).filter(models.Menu.id == id).first()
     if not db_menu:
         raise MenuExistsException()
@@ -88,7 +99,7 @@ def update_menu(db: Session, id: str, update_menu: schemas.MenuCreate, cache: sc
 
 
 # Удаление меню
-def delete_menu(db: Session, id: str, cache: schemas.CacheBase):
+def delete_menu(db: Session, id: str, cache: CacheBase):
     db_menu = db.query(models.Menu).filter(models.Menu.id == id).first()
     db.delete(db_menu)
     db.commit()
@@ -97,7 +108,7 @@ def delete_menu(db: Session, id: str, cache: schemas.CacheBase):
 
 
 # Просмотр определенного подменю
-def get_submenu(db: Session, menu_id: str, submenu_id: str, cache: schemas.CacheBase):
+def get_submenu(db: Session, menu_id: str, submenu_id: str, cache: CacheBase):
     if not cache.get(submenu_id):
         submenu = db.query(models.Submenu).filter(
             models.Submenu.menu_id == menu_id,
@@ -120,7 +131,7 @@ def get_submenu(db: Session, menu_id: str, submenu_id: str, cache: schemas.Cache
 
 
 # Просмотр списка подменю
-def get_submenu_list(db: Session, menu_id: str, cache: schemas.CacheBase):
+def get_submenu_list(db: Session, menu_id: str, cache: CacheBase):
     if not cache.get('submenu'):
         all_submenu = db.query(models.Submenu).filter(
             models.Submenu.menu_id == menu_id,
@@ -140,7 +151,7 @@ def get_submenu_list(db: Session, menu_id: str, cache: schemas.CacheBase):
 
 
 # Создание подменю
-def create_submenu(db: Session, menu_id: str, submenu: schemas.SubmenuCreate, cache: schemas.CacheBase):
+def create_submenu(db: Session, menu_id: str, submenu: schemas.SubmenuCreate, cache: CacheBase):
     new_submenu = models.Submenu(**submenu.dict())
     new_submenu.menu_id = menu_id
     db.add(new_submenu)
@@ -153,7 +164,7 @@ def create_submenu(db: Session, menu_id: str, submenu: schemas.SubmenuCreate, ca
 
 
 # Обновление подменю
-def update_submenu(db: Session, menu_id: str, submenu_id: str, update_submenu: schemas.SubmenuCreate, cache: schemas.CacheBase):
+def update_submenu(db: Session, menu_id: str, submenu_id: str, update_submenu: schemas.SubmenuCreate, cache: CacheBase):
     db_submenu = db.query(models.Submenu).filter(
         models.Submenu.menu_id == menu_id,
     ).filter(models.Submenu.id == submenu_id).first()
@@ -170,7 +181,7 @@ def update_submenu(db: Session, menu_id: str, submenu_id: str, update_submenu: s
 
 
 # Удаление подменю
-def delete_submenu(db: Session, menu_id: str, submenu_id: str, cache: schemas.CacheBase):
+def delete_submenu(db: Session, menu_id: str, submenu_id: str, cache: CacheBase):
     db_submenu = db.query(models.Submenu).filter(
         models.Submenu.menu_id == menu_id,
     ).filter(models.Submenu.id == submenu_id).first()
@@ -181,7 +192,7 @@ def delete_submenu(db: Session, menu_id: str, submenu_id: str, cache: schemas.Ca
 
 
 # Просмотр определенного блюда
-def get_dish(db: Session, submenu_id: str, dish_id: str, cache: schemas.CacheBase):
+def get_dish(db: Session, submenu_id: str, dish_id: str, cache: CacheBase):
     if not cache.get(dish_id):
         dish = db.query(models.Dishes).filter(
             models.Dishes.submenu_id == submenu_id,
@@ -197,7 +208,7 @@ def get_dish(db: Session, submenu_id: str, dish_id: str, cache: schemas.CacheBas
 
 
 # Создать блюдо
-def create_dish(db: Session, submenu_id: str, dish: schemas.DishesCreate, cache: schemas.CacheBase):
+def create_dish(db: Session, submenu_id: str, dish: schemas.DishesCreate, cache: CacheBase):
     new_dish = models.Dishes(**dish.dict())
     new_dish.price = round(dish.price, 2)
     new_dish.submenu_id = submenu_id
@@ -209,7 +220,7 @@ def create_dish(db: Session, submenu_id: str, dish: schemas.DishesCreate, cache:
 
 
 # Обновить блюдо
-def update_dish(db: Session, submenu_id: str, dish_id: str, update_dish: schemas.DishesCreate, cache: schemas.CacheBase):
+def update_dish(db: Session, submenu_id: str, dish_id: str, update_dish: schemas.DishesCreate, cache: CacheBase):
     db_dish = db.query(models.Dishes).filter(
         models.Dishes.submenu_id == submenu_id,
     ).filter(models.Dishes.id == dish_id).first()
@@ -226,7 +237,7 @@ def update_dish(db: Session, submenu_id: str, dish_id: str, update_dish: schemas
 
 
 # Просмотр списка блюд
-def get_dishes_list(db: Session, submenu_id: str, cache: schemas.CacheBase):
+def get_dishes_list(db: Session, submenu_id: str, cache: CacheBase):
     if not cache.get('dishes'):
         all_dishes = db.query(models.Dishes).filter(
             models.Dishes.submenu_id == submenu_id,
@@ -246,7 +257,7 @@ def get_dishes_list(db: Session, submenu_id: str, cache: schemas.CacheBase):
 
 
 # Удаление блюда
-def delete_dish(db: Session, menu_id: str, submenu_id: str, dish_id: str, cache: schemas.CacheBase):
+def delete_dish(db: Session, menu_id: str, submenu_id: str, dish_id: str, cache: CacheBase):
     db_dish = db.query(models.Dishes).filter(
         models.Dishes.submenu_id == submenu_id,
     ).filter(models.Dishes.id == dish_id).first()

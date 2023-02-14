@@ -115,8 +115,3 @@ class DishesCreate(BaseModel):
                 'price': '12.55',
             },
         }
-
-
-# для получения и записи кэша
-class CacheBase(BaseModel):
-    key: str
