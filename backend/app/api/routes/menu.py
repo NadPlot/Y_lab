@@ -1,14 +1,11 @@
-import http
-
 from typing import List
-from fastapi import APIRouter, Depends
-from fastapi.responses import JSONResponse
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, Body, Depends
+from starlette.status import HTTP_201_CREATED
 
-from app import crud
-from app.cache import get_redis, CacheBase
-#from app.dependencies import get_db
-from app.schemas import MenuBase, MenuCreate
+from app.models.schemas import MenuCreate, MenuRead
+from app.db.repositories.crud import MenuRepository
+from app.api.dependencies.database import get_repository
+
 
 router = APIRouter(
     prefix="/api/v1/menus",
@@ -16,13 +13,20 @@ router = APIRouter(
 )
 
 
-@router.get("/")
-async def get_all_cleanings() -> List[dict]:
-    cleanings = [
-        {"id": 1, "name": "My house", "cleaning_type": "full_clean", "price_per_hour": 29.99},
-        {"id": 2, "name": "Someone else's house", "cleaning_type": "spot_clean", "price_per_hour": 19.99}
-    ]
-    return cleanings
+@router.post("/", response_model=MenuRead, name="menu:create-menu", status_code=HTTP_201_CREATED)
+async def create_menu(
+    new_menu: MenuCreate = Body(..., embed=True),
+    db_repo: MenuRepository = Depends(get_repository(MenuRepository)),
+) -> MenuRead:
+    """
+     - **id**: идентификатор меню
+     - **title**: название меню
+     - **description**: описание меню
+     - **submenus_count**: Количество подменю в составе меню
+     - **dishes_count**: Количество блюд в меню
+    """
+    created_menu = await db_repo.create_menu(new_menu=new_menu)
+    return created_menu
 
 # @router.get(
 #     '/',

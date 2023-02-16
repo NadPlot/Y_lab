@@ -1,15 +1,16 @@
 from uuid import uuid4
 
-from sqlalchemy import Column, Float, ForeignKey, String
+from sqlalchemy import Column, Numeric, ForeignKey, String
 from sqlalchemy.dialects.postgresql import UUID
+from sqlalchemy.ext.declarative import declarative_base
 
-from app.database import Base
+Base = declarative_base()
 
 
 class Menu(Base):
     __tablename__ = 'menu'
 
-    id = Column(UUID(as_uuid=True), default=uuid4, primary_key=True)
+    id = Column(UUID(as_uuid=False), default=uuid4, primary_key=True)
     title = Column(String, nullable=False)
     description = Column(String, nullable=False)
 
@@ -17,11 +18,11 @@ class Menu(Base):
 class Submenu(Base):
     __tablename__ = 'submenu'
 
-    id = Column(UUID(as_uuid=True), default=uuid4, primary_key=True)
+    id = Column(UUID(as_uuid=False), default=uuid4, primary_key=True)
     title = Column(String, nullable=False)
     description = Column(String, nullable=False)
     menu_id = Column(
-        UUID(as_uuid=True),
+        UUID(as_uuid=False),
         ForeignKey('menu.id', ondelete='CASCADE'),
         nullable=False,
     )
@@ -30,12 +31,17 @@ class Submenu(Base):
 class Dishes(Base):
     __tablename__ = 'dishes'
 
-    id = Column(UUID(as_uuid=True), default=uuid4, primary_key=True)
+    id = Column(UUID(as_uuid=False), default=uuid4, primary_key=True)
     title = Column(String, nullable=False)
     description = Column(String, nullable=False)
-    price = Column(Float, nullable=False, default=0.00)
+    price = Column(Numeric(10, 2), nullable=False, default=0.00)
+    menu_id = Column(
+        UUID(as_uuid=False),
+        ForeignKey('menu.id', ondelete='CASCADE'),
+        nullable=False,
+    )
     submenu_id = Column(
-        UUID(as_uuid=True),
+        UUID(as_uuid=False),
         ForeignKey('submenu.id', ondelete='CASCADE'),
         nullable=False,
     )

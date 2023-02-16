@@ -6,6 +6,10 @@ from sqlalchemy import engine_from_config, pool
 from logging.config import fileConfig
 import logging
 
+from app.models.models import *
+
+target_metadata = Base.metadata
+
 # добавляем каталог приложения к пути, чтобы импортировать конфигурацию
 sys.path.append(str(pathlib.Path(__file__).resolve().parents[3]))
 
@@ -36,7 +40,7 @@ def run_migrations_online() -> None:
     with connectable.connect() as connection:
         alembic.context.configure(
             connection=connection,
-            target_metadata=None
+            target_metadata=target_metadata
         )
 
         with alembic.context.begin_transaction():
