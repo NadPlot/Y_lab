@@ -2,17 +2,19 @@ from app.db.repositories.base import BaseRepository
 from app.models.schemas import MenuCreate, MenuRead
 
 
-
 class MenuRepository(BaseRepository):
     """"
     All database actions associated with the Menu
-    Посмотри как было в стажировке объявление моделей, metadata
     """
 
     async def create_menu(self, *, new_menu: MenuCreate) -> MenuRead:
-        query = '11'
+        query = """
+        INSERT INTO menu(title, description)
+        VALUES (:title, :description)
+        RETURNING id, title, description;
+        """
         values = new_menu.dict()
-        new_menu = await self.db.execute(query=query, values=values)
+        new_menu = await self.db.fetch_one(query=query, values=values)
 
         return MenuRead(**new_menu)
 

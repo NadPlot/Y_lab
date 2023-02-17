@@ -6,7 +6,7 @@ from sqlalchemy import engine_from_config, pool
 from logging.config import fileConfig
 import logging
 
-from app.models.models import *
+from app.models.models import Base
 
 target_metadata = Base.metadata
 
@@ -36,7 +36,7 @@ def run_migrations_online() -> None:
             prefix="sqlalchemy.",
             poolclass=pool.NullPool,
         )
-        
+
     with connectable.connect() as connection:
         alembic.context.configure(
             connection=connection,

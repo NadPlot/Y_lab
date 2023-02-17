@@ -25,8 +25,7 @@ async def create_menu(
      - **submenus_count**: Количество подменю в составе меню
      - **dishes_count**: Количество блюд в меню
     """
-    created_menu = await db_repo.create_menu(new_menu=new_menu)
-    return created_menu
+    return await db_repo.create_menu(new_menu=new_menu)
 
 # @router.get(
 #     '/',
