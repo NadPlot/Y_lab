@@ -22,8 +22,6 @@ TAGS_METADATA = [
     },
 ]
 
-SECRET_KEY = config("SECRET_KEY", cast=Secret, default="CHANGEME")
-
 POSTGRES_USER = config("POSTGRES_USER", cast=str)
 POSTGRES_PASSWORD = config("POSTGRES_PASSWORD", cast=Secret)
 POSTGRES_SERVER = config("POSTGRES_SERVER", cast=str, default="db")

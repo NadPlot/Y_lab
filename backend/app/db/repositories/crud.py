@@ -1,5 +1,7 @@
 from app.db.repositories.base import BaseRepository
 from app.models.schemas import MenuCreate, MenuRead
+from sqlalchemy import insert, select
+from app.models.models import Menu
 
 
 class MenuRepository(BaseRepository):
@@ -8,15 +10,10 @@ class MenuRepository(BaseRepository):
     """
 
     async def create_menu(self, *, new_menu: MenuCreate) -> MenuRead:
-        query = """
-        INSERT INTO menu(title, description)
-        VALUES (:title, :description)
-        RETURNING id, title, description;
-        """
-        values = new_menu.dict()
-        new_menu = await self.db.fetch_one(query=query, values=values)
-
-        return MenuRead(**new_menu)
+        create_menu_query = insert(Menu).values(new_menu.dict())
+        menu_id = await self.db.execute(query=create_menu_query)
+        get_menu = select(Menu).where(Menu.id == menu_id)
+        return MenuRead(**await self.db.fetch_one(query=get_menu))
 
 
 # import json
