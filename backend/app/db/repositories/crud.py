@@ -4,28 +4,17 @@ from sqlalchemy import insert, select
 from app.models.models import Menu
 
 
-class Queries:
-    def __init__(self, model, value):
-        self.model = model
-        self.value = value
-
-    @classmethod
-    def create(cls, model, value):
-        return insert(model).values(value.dict())
-
-    @classmethod
-    def select(cls, model, id):
-        return select(model).where(model.id == id)
-
-
 class MenuRepository(BaseRepository):
     """"
     All database actions associated with the Menu
     """
 
     async def create_menu(self, *, new_menu: MenuCreate) -> MenuRead:
-        new_menu = await self.db.execute(query=Queries.create(Menu, new_menu))
-        return MenuRead(**await self.db.fetch_one(query=Queries.select(Menu, new_menu)))
+        new_menu = await self.db.execute(query=insert(Menu).values(new_menu.dict()))
+        return MenuRead(**await self.db.fetch_one(query=select(Menu).where(Menu.id == new_menu)))
+
+    async def get_menu(self, *, id: str) -> MenuRead:
+        return MenuRead(**await self.db.fetch_one(query=select(Menu).where(Menu.id == id)))
 
 
 # import json

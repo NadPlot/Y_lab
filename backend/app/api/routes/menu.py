@@ -27,6 +27,24 @@ async def create_menu(
     """
     return await db_repo.create_menu(new_menu=new_menu)
 
+
+@router.get("/{id}", response_model=MenuRead, name="menu:read-menu")
+async def get_menu(
+    id: str,
+    db_repo: MenuRepository = Depends(get_repository(MenuRepository)),
+) -> MenuRead:
+    """
+      По id меню посмотреть определенное меню:
+
+      - **id**: идентификатор меню
+      - **title**: название меню
+      - **description**: описание меню
+      - **submenus_count**: Количество подменю в составе меню
+      - **dishes_count**: Количество блюд в меню
+    """
+    return await db_repo.get_menu(id=id)
+
+
 # @router.get(
 #     '/',
 #     response_model=list[MenuBase],
